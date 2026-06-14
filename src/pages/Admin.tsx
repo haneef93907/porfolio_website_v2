@@ -140,7 +140,7 @@ function imageUpload(setValue: (value: string) => void) {
 export default function Admin() {
   const [loggedIn, setLoggedIn] = useState(() => safeGetStorage("session", "portfolio-admin") === "true");
   const [password, setPassword] = useState("");
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>("blogs");
   const [projects, setProjects] = useState<Project[]>(() => getProjects());
   const [blogs, setBlogs] = useState<BlogPost[]>(() => getBlogs());
   const [projectForm, setProjectForm] = useState<ProjectForm | null>(null);
