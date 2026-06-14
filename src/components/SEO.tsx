@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "../config/site";
 
 interface SEOProps {
   title: string;
@@ -38,17 +39,19 @@ export default function SEO({
   title,
   description,
   keywords = "Flutter developer, mobile app developer, Flutter app development, Firebase apps, Android iOS apps, Stripe integration",
-  image = "/project-amanah.jpg",
-  canonical = "https://mhaneef.vercel.app/",
+  image = DEFAULT_OG_IMAGE,
+  canonical = SITE_URL,
   schema,
 }: SEOProps) {
   useEffect(() => {
+    const absoluteImage = image.startsWith("http") ? image : `${SITE_URL}${image}`;
+
     document.title = title;
     setMeta('meta[name="description"]', "content", description);
     setMeta('meta[name="keywords"]', "content", keywords);
     setMeta('meta[property="og:title"]', "content", title);
     setMeta('meta[property="og:description"]', "content", description);
-    setMeta('meta[property="og:image"]', "content", image);
+    setMeta('meta[property="og:image"]', "content", absoluteImage);
     setMeta('meta[property="og:type"]', "content", "website");
     setMeta('meta[property="og:url"]', "content", canonical);
     setMeta('meta[name="twitter:card"]', "content", "summary_large_image");

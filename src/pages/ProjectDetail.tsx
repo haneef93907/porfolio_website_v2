@@ -6,6 +6,7 @@ import Footer from "../sections/Footer";
 import Contact from "../sections/Contact";
 import SEO from "../components/SEO";
 import { safeArray } from "../lib/utils";
+import { SITE_URL } from "../config/site";
 
 export default function ProjectDetail() {
   const { slug = "" } = useParams();
@@ -38,7 +39,7 @@ export default function ProjectDetail() {
         title={project.seoTitle}
         description={project.seoDescription}
         image={project.image}
-        canonical={`https://mhaneef.vercel.app/#/projects/${project.slug}`}
+        canonical={`${SITE_URL}/projects/${project.slug}`}
         schema={{
           "@context": "https://schema.org",
           "@type": "CreativeWork",

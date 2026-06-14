@@ -11,6 +11,7 @@ import Blog from "../sections/Blog";
 import Contact from "../sections/Contact";
 import Footer from "../sections/Footer";
 import SEO from "../components/SEO";
+import { SITE_URL } from "../config/site";
 
 export default function Home() {
   useEffect(() => {
@@ -35,13 +36,13 @@ export default function Home() {
       <SEO
         title="Muhammad Haneef | Flutter Developer for Production-Ready Mobile Apps"
         description="Hire Muhammad Haneef, a Flutter Developer with 3.5+ years of experience building production-ready Android and iOS apps with Firebase, REST APIs, Stripe, real-time features, and store deployment."
-        canonical="https://mhaneef.vercel.app/"
+        canonical={SITE_URL}
         schema={{
           "@context": "https://schema.org",
           "@type": "Person",
           name: "Muhammad Haneef",
           jobTitle: "Flutter Developer",
-          url: "https://mhaneef.vercel.app/",
+          url: SITE_URL,
           sameAs: ["https://www.linkedin.com/in/muhammad-haneef-flutterdev/"],
           knowsAbout: [
             "Flutter",

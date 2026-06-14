@@ -5,6 +5,7 @@ import Navigation from "../sections/Navigation";
 import Footer from "../sections/Footer";
 import SEO from "../components/SEO";
 import { safeArray } from "../lib/utils";
+import { SITE_URL } from "../config/site";
 
 function renderMarkdown(content: string) {
   return content
@@ -74,7 +75,7 @@ export default function BlogDetail() {
         title={blog.seoTitle}
         description={blog.seoDescription}
         image={blog.image}
-        canonical={`https://mhaneef.vercel.app/#/blog/${blog.slug}`}
+        canonical={`${SITE_URL}/blog/${blog.slug}`}
         schema={{
           "@context": "https://schema.org",
           "@type": "BlogPosting",

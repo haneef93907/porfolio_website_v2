@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
@@ -12,6 +12,8 @@ const navLinks = [
 ];
 
 export default function Navigation() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -26,10 +28,15 @@ export default function Navigation() {
   const handleNavClick = (href: string) => {
     setMobileOpen(false);
     if (href.startsWith("#")) {
-      const el = document.querySelector(href);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
+      if (location.pathname !== "/") {
+        navigate({ pathname: "/", hash: href });
+        setTimeout(() => {
+          document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+        }, 50);
+        return;
       }
+
+      document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -37,14 +44,14 @@ export default function Navigation() {
     <nav
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         scrolled
-          ? "dark:bg-background/90 dark:backdrop-blur-xl dark:border-b dark:border-white/5 bg-white/95 backdrop-blur-xl border-b border-gray-200"
-          : "bg-transparent"
-      }`}
+          ? "bg-background/95 shadow-sm"
+          : "bg-background/82"
+      } backdrop-blur-xl border-b border-border/70 text-foreground`}
     >
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
         <Link
           to="/"
-          className="font-mono font-bold text-xl hover:text-primary transition-colors animate-fade-in"
+          className="font-mono font-bold text-xl text-foreground hover:text-primary transition-colors animate-fade-in"
         >
           MH
         </Link>
@@ -56,7 +63,7 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 to={link.href}
-                className="text-sm font-mono uppercase tracking-wider hover:text-primary transition-colors duration-300 hover-glow"
+                className="text-sm font-mono uppercase tracking-wider text-foreground/85 hover:text-primary transition-colors duration-300"
               >
                 {link.label}
               </Link>
@@ -64,7 +71,7 @@ export default function Navigation() {
               <button
                 key={link.href}
                 onClick={() => handleNavClick(link.href)}
-                className="text-sm font-mono uppercase tracking-wider hover:text-primary transition-colors duration-300 hover-glow"
+                className="text-sm font-mono uppercase tracking-wider text-foreground/85 hover:text-primary transition-colors duration-300"
               >
                 {link.label}
               </button>
@@ -81,7 +88,7 @@ export default function Navigation() {
 
         {/* Mobile menu button */}
         <button
-          className="md:hidden"
+          className="md:hidden text-foreground"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
@@ -91,7 +98,7 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden dark:bg-background/95 dark:backdrop-blur-xl dark:border-b dark:border-white/5 bg-white/95 backdrop-blur-xl border-b border-gray-200 animate-slide-down">
+        <div className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border animate-slide-down">
           <div className="px-6 py-4 flex flex-col gap-4">
             {navLinks.map((link) => (
               link.href.startsWith("/") ? (
@@ -99,7 +106,7 @@ export default function Navigation() {
                   key={link.href}
                   to={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-left text-sm font-mono uppercase tracking-wider hover:text-primary transition-colors py-2 duration-300"
+                  className="text-left text-sm font-mono uppercase tracking-wider text-foreground/85 hover:text-primary transition-colors py-2 duration-300"
                 >
                   {link.label}
                 </Link>
@@ -107,7 +114,7 @@ export default function Navigation() {
                 <button
                   key={link.href}
                   onClick={() => handleNavClick(link.href)}
-                  className="text-left text-sm font-mono uppercase tracking-wider hover:text-primary transition-colors py-2 duration-300"
+                  className="text-left text-sm font-mono uppercase tracking-wider text-foreground/85 hover:text-primary transition-colors py-2 duration-300"
                 >
                   {link.label}
                 </button>

@@ -6,6 +6,7 @@ import Navigation from './Navigation';
 import Footer from './Footer';
 import SEO from '../components/SEO';
 import { safeArray } from '../lib/utils';
+import { SITE_URL } from '../config/site';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -180,7 +181,7 @@ export default function Blog() {
       <SEO
         title="Flutter Blog | Muhammad Haneef"
         description="Flutter app development articles, case stories, Firebase guides, performance notes, and client-focused mobile app advice by Muhammad Haneef."
-        canonical="https://mhaneef.vercel.app/#/blog"
+        canonical={`${SITE_URL}/blog`}
       />
       <Navigation />
       <div className="pt-16">{content}</div>
