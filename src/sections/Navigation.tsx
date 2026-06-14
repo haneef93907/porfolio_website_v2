@@ -48,12 +48,17 @@ export default function Navigation() {
           : "bg-background/95 shadow-sm"
       } backdrop-blur-xl border-b border-border text-foreground`}
     >
-      <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between animate-slide-down">
         <Link
           to="/"
-          className="font-mono font-bold text-xl text-foreground hover:text-primary transition-colors animate-fade-in"
+          className="group relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-card text-foreground shadow-sm transition-all duration-300 animate-fade-in hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_28px_hsl(var(--primary)/0.28)]"
+          aria-label="Muhammad Haneef home"
         >
-          MH
+          <span className="absolute inset-[-5px] rounded-full border border-primary/20 opacity-70 transition duration-300 group-hover:scale-110 group-hover:opacity-100" />
+          <span className="absolute inset-[-9px] rounded-full border border-dashed border-primary/25 animate-spin [animation-duration:9s] group-hover:border-primary/55" />
+          <span className="relative font-mono text-sm font-bold tracking-tight">
+            MH
+          </span>
         </Link>
 
         {/* Desktop nav */}
@@ -63,7 +68,7 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 to={link.href}
-                className="text-sm font-mono uppercase tracking-wider text-foreground/85 hover:text-primary transition-colors duration-300"
+                className="relative text-sm font-mono uppercase tracking-wider text-foreground/85 transition-colors duration-300 hover:text-primary after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
               >
                 {link.label}
               </Link>
@@ -71,7 +76,7 @@ export default function Navigation() {
               <button
                 key={link.href}
                 onClick={() => handleNavClick(link.href)}
-                className="text-sm font-mono uppercase tracking-wider text-foreground/85 hover:text-primary transition-colors duration-300"
+                className="relative text-sm font-mono uppercase tracking-wider text-foreground/85 transition-colors duration-300 hover:text-primary after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
               >
                 {link.label}
               </button>
