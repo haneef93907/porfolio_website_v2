@@ -506,7 +506,10 @@ export function getBlogs(): BlogPost[] {
   try {
     const stored = safeGetStorage("local", STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored).map(normalizeBlog);
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed.map(normalizeBlog).filter(Boolean);
+      }
     }
   } catch {
     // ignore
@@ -568,11 +571,24 @@ function slugify(value: string): string {
 }
 
 function normalizeBlog(blog: BlogPost): BlogPost {
+  const title = blog?.title || "Untitled Flutter Article";
+  const excerpt = blog?.excerpt || "Flutter app development insights by Muhammad Haneef.";
+  const tags = Array.isArray(blog?.tags) ? blog.tags : [];
+
   return {
     ...blog,
-    slug: blog.slug || slugify(blog.title),
-    seoTitle: blog.seoTitle || `${blog.title} | Muhammad Haneef`,
-    seoDescription: blog.seoDescription || blog.excerpt,
-    published: blog.published ?? true,
+    id: blog?.id || `blog-${Date.now()}`,
+    title,
+    excerpt,
+    content: blog?.content || `# ${title}\n\n${excerpt}`,
+    category: blog?.category || "Flutter",
+    date: blog?.date || new Date().toISOString().slice(0, 10),
+    readTime: blog?.readTime || "5 min read",
+    image: blog?.image || "/project-amanah.jpg",
+    tags,
+    slug: blog?.slug || slugify(title),
+    seoTitle: blog?.seoTitle || `${title} | Muhammad Haneef`,
+    seoDescription: blog?.seoDescription || excerpt,
+    published: blog?.published ?? true,
   };
 }

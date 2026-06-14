@@ -289,7 +289,10 @@ export function getProjects(): Project[] {
   try {
     const stored = safeGetStorage("local", STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored).map(normalizeProject);
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed.map(normalizeProject).filter(Boolean);
+      }
     }
   } catch {
     // ignore
@@ -353,19 +356,32 @@ export function slugify(value: string): string {
 }
 
 function normalizeProject(project: Project): Project {
+  const title = project?.title || "Untitled Project";
+  const description = project?.description || "Production-ready Flutter mobile app project.";
+  const image = project?.image || "/project-amanah.jpg";
+  const technologies = Array.isArray(project?.technologies) ? project.technologies : [];
+  const features = Array.isArray(project?.features) ? project.features : [];
+  const screenshots = Array.isArray(project?.screenshots) ? project.screenshots : [];
+
   return {
     ...project,
-    slug: project.slug || slugify(project.title),
-    overview: project.overview || project.description,
+    id: project?.id || `project-${Date.now()}`,
+    title,
+    description,
+    image,
+    technologies,
+    features,
+    slug: project?.slug || slugify(title),
+    overview: project?.overview || description,
     problem: project.problem || "The client needed a reliable, production-ready mobile experience.",
-    solution: project.solution || project.description,
+    solution: project.solution || description,
     role: project.role || "Flutter Developer",
     category: project.category || "Mobile App",
-    screenshots: project.screenshots?.length ? project.screenshots : [project.image],
+    screenshots: screenshots.length ? screenshots : [image],
     result: project.result || project.impact || "Delivered a polished production-ready mobile app experience.",
     links: project.links || { website: project.link },
-    seoTitle: project.seoTitle || `${project.title} Flutter Case Study | Muhammad Haneef`,
-    seoDescription: project.seoDescription || project.description,
+    seoTitle: project.seoTitle || `${title} Flutter Case Study | Muhammad Haneef`,
+    seoDescription: project.seoDescription || description,
     featured: project.featured ?? false,
     published: project.published ?? true,
   };
