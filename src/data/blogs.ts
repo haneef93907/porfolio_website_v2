@@ -1,5 +1,6 @@
 export interface BlogPost {
   id: string;
+  slug: string;
   title: string;
   excerpt: string;
   content: string;
@@ -8,11 +9,15 @@ export interface BlogPost {
   readTime: string;
   image: string;
   tags: string[];
+  seoTitle: string;
+  seoDescription: string;
+  published: boolean;
 }
 
-export const flutterBlogs: BlogPost[] = [
+export const defaultBlogs: BlogPost[] = [
   {
     id: 'hire-flutter-developer-startup',
+    slug: 'hire-flutter-developer-startup',
     title: 'How Hiring a Flutter Developer Helps Startups Launch Faster',
     excerpt: 'A client-focused guide explaining how Flutter reduces build time, protects budget, and helps founders ship polished iOS, Android, and web products from one codebase.',
     content: `
@@ -42,10 +47,14 @@ If you need a scalable Flutter app, start with a clear MVP scope, then build tow
     date: '2026-06-14',
     readTime: '6 min read',
     image: '/flutter-client-growth.jpg',
-    tags: ['Hire Flutter Developer', 'Flutter App Development', 'Startup MVP', 'Mobile App Developer', 'Cross Platform App']
+    tags: ['Hire Flutter Developer', 'Flutter App Development', 'Startup MVP', 'Mobile App Developer', 'Cross Platform App'],
+    seoTitle: 'Hire a Flutter Developer to Launch Startup Apps Faster',
+    seoDescription: 'Learn how a Flutter developer helps startups ship polished Android and iOS apps faster with clean architecture and scalable delivery.',
+    published: true
   },
   {
     id: 'flutter-seo-web-apps',
+    slug: 'flutter-seo-web-apps',
     title: 'Flutter Web SEO: What Clients Should Know Before Building',
     excerpt: 'Practical SEO advice for Flutter web projects, including when to use Flutter web, how to structure landing pages, and how to win search traffic.',
     content: `
@@ -69,10 +78,14 @@ Write about problems clients search for: app development cost, Flutter vs native
     date: '2026-06-10',
     readTime: '5 min read',
     image: '/flutter-seo.jpg',
-    tags: ['Flutter SEO', 'Flutter Web', 'SEO for Developers', 'Client Acquisition', 'Technical SEO']
+    tags: ['Flutter SEO', 'Flutter Web', 'SEO for Developers', 'Client Acquisition', 'Technical SEO'],
+    seoTitle: 'Flutter Web SEO Guide for Clients and Founders',
+    seoDescription: 'Practical Flutter web SEO advice for clients, founders, and teams planning indexable app experiences.',
+    published: true
   },
   {
     id: 'flutter-performance',
+    slug: 'flutter-performance-optimization-guide',
     title: 'Optimizing Flutter App Performance: A Complete Guide',
     excerpt: 'Learn how to build lightning-fast Flutter apps with best practices for performance optimization, memory management, and smooth animations.',
     content: `
@@ -138,10 +151,14 @@ Following these practices will significantly improve your Flutter app's performa
     date: '2024-01-15',
     readTime: '8 min read',
     image: '/flutter-performance.jpg',
-    tags: ['Flutter', 'Performance', 'Optimization', 'Best Practices']
+    tags: ['Flutter', 'Performance', 'Optimization', 'Best Practices'],
+    seoTitle: 'Flutter App Performance Optimization Guide',
+    seoDescription: 'A practical guide to optimizing Flutter apps for speed, smooth animation, memory, and production stability.',
+    published: true
   },
   {
     id: 'flutter-state-management',
+    slug: 'flutter-state-management-provider-riverpod-bloc',
     title: 'State Management in Flutter: Provider vs Riverpod vs Bloc',
     excerpt: 'Compare popular state management solutions in Flutter and learn when to use each one for optimal app architecture.',
     content: `
@@ -216,10 +233,14 @@ The best choice depends on your project size, team experience, and specific requ
     date: '2024-01-10',
     readTime: '10 min read',
     image: '/flutter-state.jpg',
-    tags: ['Flutter', 'State Management', 'Architecture', 'Provider', 'Riverpod', 'Bloc']
+    tags: ['Flutter', 'State Management', 'Architecture', 'Provider', 'Riverpod', 'Bloc'],
+    seoTitle: 'Flutter State Management: Provider vs Riverpod vs Bloc',
+    seoDescription: 'Compare Provider, Riverpod, and Bloc for scalable Flutter architecture and production app development.',
+    published: true
   },
   {
     id: 'flutter-animations',
+    slug: 'creating-beautiful-flutter-animations',
     title: 'Creating Beautiful Animations in Flutter',
     excerpt: 'Master Flutter animations with practical examples, from basic transitions to complex custom animations.',
     content: `
@@ -290,10 +311,14 @@ Mastering animations will significantly improve your app's visual appeal and use
     date: '2024-01-05',
     readTime: '7 min read',
     image: '/flutter-animations.jpg',
-    tags: ['Flutter', 'Animations', 'UI', 'UX', 'Design']
+    tags: ['Flutter', 'Animations', 'UI', 'UX', 'Design'],
+    seoTitle: 'Creating Beautiful Animations in Flutter',
+    seoDescription: 'Learn how Flutter animations improve product polish, user experience, and mobile app quality.',
+    published: true
   },
   {
     id: 'flutter-firebase',
+    slug: 'flutter-firebase-integration-guide',
     title: 'Firebase Integration with Flutter: Real-time Database',
     excerpt: 'Learn how to integrate Firebase with Flutter for real-time data synchronization and backend services.',
     content: `
@@ -384,10 +409,14 @@ Firebase integration makes it easy to build feature-rich Flutter apps with minim
     date: '2023-12-28',
     readTime: '9 min read',
     image: '/flutter-firebase.jpg',
-    tags: ['Flutter', 'Firebase', 'Backend', 'Database', 'Authentication']
+    tags: ['Flutter', 'Firebase', 'Backend', 'Database', 'Authentication'],
+    seoTitle: 'Firebase Integration in Flutter Apps',
+    seoDescription: 'Guide to using Firebase Auth, Firestore, Storage, and backend features in production Flutter apps.',
+    published: true
   },
   {
     id: 'flutter-web-deployment',
+    slug: 'flutter-web-deployment-guide',
     title: 'Deploying Flutter Apps to Web: Complete Guide',
     excerpt: 'Deploy your Flutter web apps with optimized performance and proper SEO configuration.',
     content: `
@@ -460,6 +489,88 @@ Flutter web apps can provide excellent performance and reach users across all pl
     date: '2023-12-20',
     readTime: '8 min read',
     image: '/flutter-web.jpg',
-    tags: ['Flutter', 'Web', 'Deployment', 'SEO', 'Performance']
+    tags: ['Flutter', 'Web', 'Deployment', 'SEO', 'Performance'],
+    seoTitle: 'Deploying Flutter Web Apps with SEO and Performance',
+    seoDescription: 'Deploy Flutter web apps with optimized performance, metadata, hosting, and production configuration.',
+    published: true
   }
 ];
+
+const STORAGE_KEY = "portfolio-blogs-v2";
+
+export const flutterBlogs = defaultBlogs;
+
+export function getBlogs(): BlogPost[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored).map(normalizeBlog);
+    }
+  } catch {
+    // ignore
+  }
+  return defaultBlogs;
+}
+
+export function getPublishedBlogs(): BlogPost[] {
+  return getBlogs()
+    .filter((blog) => blog.published)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export function getBlogBySlug(slug: string): BlogPost | undefined {
+  return getPublishedBlogs().find((blog) => blog.slug === slug || blog.id === slug);
+}
+
+export function saveBlogs(blogs: BlogPost[]): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(blogs));
+}
+
+export function addBlog(blog: Omit<BlogPost, "id">): BlogPost[] {
+  const blogs = getBlogs();
+  const newBlog: BlogPost = {
+    ...blog,
+    id: `blog-${Date.now()}`,
+    slug: blog.slug || slugify(blog.title),
+  };
+  const updated = [newBlog, ...blogs];
+  saveBlogs(updated);
+  return updated;
+}
+
+export function updateBlog(id: string, updates: Partial<BlogPost>): BlogPost[] {
+  const blogs = getBlogs();
+  const updated = blogs.map((blog) => (blog.id === id ? normalizeBlog({ ...blog, ...updates }) : blog));
+  saveBlogs(updated);
+  return updated;
+}
+
+export function deleteBlog(id: string): BlogPost[] {
+  const blogs = getBlogs();
+  const updated = blogs.filter((blog) => blog.id !== id);
+  saveBlogs(updated);
+  return updated;
+}
+
+export function resetBlogs(): BlogPost[] {
+  saveBlogs(defaultBlogs);
+  return defaultBlogs;
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function normalizeBlog(blog: BlogPost): BlogPost {
+  return {
+    ...blog,
+    slug: blog.slug || slugify(blog.title),
+    seoTitle: blog.seoTitle || `${blog.title} | Muhammad Haneef`,
+    seoDescription: blog.seoDescription || blog.excerpt,
+    published: blog.published ?? true,
+  };
+}

@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router';
 import gsap from 'gsap';
-import { flutterBlogs } from '../data/blogs';
+import { getPublishedBlogs } from '../data/blogs';
+import Navigation from './Navigation';
+import Footer from './Footer';
+import SEO from '../components/SEO';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -22,9 +26,12 @@ function clampScore(value: number) {
 }
 
 export default function Blog() {
+  const location = useLocation();
+  const standalone = location.pathname === '/blog';
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const blogs = getPublishedBlogs();
   const [draftTitle, setDraftTitle] = useState('How I build scalable Flutter apps for startups');
   const [draftStory, setDraftStory] = useState(
     'I help founders and businesses turn mobile app ideas into polished Flutter products with clean architecture, Firebase integration, offline support, and performance-focused releases.'
@@ -33,8 +40,8 @@ export default function Blog() {
   const categories = ['All', 'Client Growth', 'SEO', 'Performance', 'Architecture', 'UI/UX', 'Backend', 'Deployment'];
 
   const filteredBlogs = selectedCategory === 'All'
-    ? flutterBlogs
-    : flutterBlogs.filter(blog => blog.category === selectedCategory);
+    ? blogs
+    : blogs.filter(blog => blog.category === selectedCategory);
 
   const titleLength = draftTitle.trim().length;
   const storyWords = draftStory.trim().split(/\s+/).filter(Boolean).length;
@@ -91,7 +98,7 @@ export default function Blog() {
     return () => ctx.revert();
   }, [filteredBlogs]);
 
-  return (
+  const content = (
     <section
       id="blog"
       ref={sectionRef}
@@ -259,7 +266,7 @@ export default function Blog() {
                     size="sm"
                     className="w-full group-hover:bg-accent group-hover:text-accent-foreground transition-all"
                   >
-                    Read Article
+                    <Link to={`/blog/${blog.slug}`}>Read More</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -290,5 +297,20 @@ export default function Blog() {
         </div>
       </div>
     </section>
+  );
+
+  if (!standalone) return content;
+
+  return (
+    <>
+      <SEO
+        title="Flutter Blog | Muhammad Haneef"
+        description="Flutter app development articles, case stories, Firebase guides, performance notes, and client-focused mobile app advice by Muhammad Haneef."
+        canonical="https://mhaneef.vercel.app/#/blog"
+      />
+      <Navigation />
+      <div className="pt-16">{content}</div>
+      <Footer />
+    </>
   );
 }

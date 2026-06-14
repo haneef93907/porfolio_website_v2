@@ -74,27 +74,27 @@ function ExperienceCard({ entry }: { entry: ExperienceEntry }) {
   return (
     <div
       ref={cardRef}
-      className={`relative bg-[#111111] border-l-[3px] border-saffron p-6 sm:p-8 rounded-r shadow-lg ${
+      className={`relative bg-card border border-border border-l-[3px] border-l-primary p-6 sm:p-8 rounded shadow-lg ${
         entry.align === "left" ? "lg:mr-auto" : "lg:ml-auto"
       } lg:max-w-[700px]`}
     >
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
         <div>
-          <h3 className="font-grotesk font-bold text-xl sm:text-2xl text-off-white">
+          <h3 className="font-grotesk font-bold text-xl sm:text-2xl text-foreground">
             {entry.company}
           </h3>
-          <p className="text-saffron font-medium text-sm mt-1">{entry.role}</p>
+          <p className="text-primary font-medium text-sm mt-1">{entry.role}</p>
         </div>
         <div className="text-right shrink-0">
-          <p className="font-mono text-xs text-cyan">{entry.period}</p>
-          <p className="text-xs text-slate mt-1">{entry.location}</p>
+          <p className="font-mono text-xs text-accent">{entry.period}</p>
+          <p className="text-xs text-muted-foreground mt-1">{entry.location}</p>
         </div>
       </div>
 
       <ul className="space-y-2">
         {entry.highlights.map((highlight, i) => (
-          <li key={i} className="flex gap-3 text-sm text-slate leading-relaxed">
-            <span className="text-saffron mt-1 shrink-0">-</span>
+          <li key={i} className="flex gap-3 text-sm text-muted-foreground leading-relaxed">
+            <span className="text-primary mt-1 shrink-0">-</span>
             <span>{highlight}</span>
           </li>
         ))}
@@ -107,13 +107,13 @@ export default function Experience() {
   return (
     <section
       id="experience"
-      className="relative bg-navy py-24 sm:py-32 lg:py-40"
+      className="relative bg-secondary/40 py-24 sm:py-32 lg:py-40"
     >
       <div className="max-w-[1000px] mx-auto px-6">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-slate mb-4 text-center">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4 text-center">
           EXPERIENCE
         </p>
-        <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-off-white mb-12 lg:mb-16 text-center">
+        <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-12 lg:mb-16 text-center">
           Work History
         </h2>
 

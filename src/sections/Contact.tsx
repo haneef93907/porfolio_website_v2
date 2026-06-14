@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Linkedin, Github, Phone, Mail, Send } from "lucide-react";
+import { Linkedin, Github, Phone, Mail, Send, MessageCircle } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -9,6 +9,8 @@ export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    projectType: "MVP Development",
+    budget: "$1k - $3k",
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
@@ -38,9 +40,9 @@ export default function Contact() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, email, message } = formData;
-    const subject = `Portfolio Contact from ${name}`;
-    const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
+    const { name, email, projectType, budget, message } = formData;
+    const subject = `Flutter Project Inquiry from ${name}`;
+    const body = `Name: ${name}\nEmail: ${email}\nProject Type: ${projectType}\nBudget Range: ${budget}\n\nMessage:\n${message}`;
     window.location.href = `mailto:haneef93907@gmail.com?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
@@ -52,32 +54,73 @@ export default function Contact() {
     <section
       id="contact"
       ref={sectionRef}
-      className="relative bg-void py-24 sm:py-32 lg:py-40 border-t border-saffron/20"
+      className="relative bg-background py-24 sm:py-32 lg:py-40 border-t border-border"
     >
-      <div className="max-w-[800px] mx-auto px-6 text-center">
-        <h2 className="contact-animate font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-off-white mb-6">
-          Let&apos;s Build Something Extraordinary
-        </h2>
+      <div className="max-w-[1100px] mx-auto px-6">
+        <div className="contact-animate text-center mb-12">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
+            Contact
+          </p>
+          <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-6">
+            Have a Flutter app to build, fix, or launch?
+          </h2>
 
-        <p className="contact-animate text-slate text-base sm:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
-          I am currently open to senior Flutter and mobile engineering roles. If
-          you have a challenging project, let&apos;s talk.
-        </p>
+          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
+            Send the project details and I will respond with a clear next step.
+            I am available for Flutter development, MVPs, Firebase apps,
+            integrations, optimization, and store deployment.
+          </p>
+        </div>
 
-        <a
-          href="mailto:haneef93907@gmail.com"
-          className="contact-animate inline-flex items-center gap-2 font-mono text-lg sm:text-xl text-saffron hover:underline transition-all mb-12"
-        >
-          <Mail size={20} />
-          haneef93907@gmail.com
-        </a>
+        <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+          <aside className="contact-animate rounded border border-border bg-card p-6">
+            <h3 className="font-grotesk text-xl font-semibold text-foreground">
+              Direct contact
+            </h3>
+            <div className="mt-6 space-y-4">
+              <a
+                href="mailto:haneef93907@gmail.com"
+                className="flex items-center gap-3 text-muted-foreground hover:text-primary"
+              >
+                <Mail size={18} />
+                haneef93907@gmail.com
+              </a>
+              <a
+                href="tel:+923030038699"
+                className="flex items-center gap-3 text-muted-foreground hover:text-primary"
+              >
+                <Phone size={18} />
+                +92 303 0038699
+              </a>
+              <a
+                href="https://wa.me/923030038699"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-emerald-500 hover:text-emerald-400"
+              >
+                <MessageCircle size={18} />
+                WhatsApp Me
+              </a>
+              <a
+                href="https://www.linkedin.com/in/muhammad-haneef-flutterdev/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-muted-foreground hover:text-primary"
+              >
+                <Linkedin size={18} />
+                LinkedIn
+              </a>
+            </div>
+            <div className="mt-8 rounded bg-secondary/70 p-4 text-sm leading-relaxed text-muted-foreground">
+              Best fit: startups, founders, agencies, and businesses that need
+              a reliable Flutter developer for real production apps.
+            </div>
+          </aside>
 
-        <form
-          onSubmit={handleSubmit}
-          className="contact-animate max-w-lg mx-auto text-left space-y-4"
-        >
+        <form onSubmit={handleSubmit} className="contact-animate text-left space-y-4 rounded border border-border bg-card p-6">
+          <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm text-slate mb-1.5">Name</label>
+            <label className="block text-sm text-muted-foreground mb-1.5">Name</label>
             <input
               type="text"
               required
@@ -85,12 +128,12 @@ export default function Contact() {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="w-full bg-[#111] border border-white/10 rounded px-4 py-3 text-off-white placeholder-slate/50 focus:border-saffron focus:outline-none transition-colors"
+              className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
               placeholder="Your name"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate mb-1.5">Email</label>
+            <label className="block text-sm text-muted-foreground mb-1.5">Email</label>
             <input
               type="email"
               required
@@ -98,12 +141,44 @@ export default function Contact() {
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              className="w-full bg-[#111] border border-white/10 rounded px-4 py-3 text-off-white placeholder-slate/50 focus:border-saffron focus:outline-none transition-colors"
+              className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
               placeholder="your@email.com"
             />
           </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1.5">Project Type</label>
+              <select
+                value={formData.projectType}
+                onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
+                className="w-full bg-background border border-border rounded px-4 py-3 text-foreground focus:border-primary focus:outline-none transition-colors"
+              >
+                <option>MVP Development</option>
+                <option>Flutter App Development</option>
+                <option>Firebase App</option>
+                <option>API / Stripe Integration</option>
+                <option>Bug Fixing / Optimization</option>
+                <option>Store Deployment</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1.5">Budget Range</label>
+              <select
+                value={formData.budget}
+                onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                className="w-full bg-background border border-border rounded px-4 py-3 text-foreground focus:border-primary focus:outline-none transition-colors"
+              >
+                <option>$1k - $3k</option>
+                <option>$3k - $7k</option>
+                <option>$7k - $15k</option>
+                <option>$15k+</option>
+                <option>Need estimate</option>
+              </select>
+            </div>
+          </div>
           <div>
-            <label className="block text-sm text-slate mb-1.5">Message</label>
+            <label className="block text-sm text-muted-foreground mb-1.5">Message</label>
             <textarea
               required
               rows={4}
@@ -111,19 +186,20 @@ export default function Contact() {
               onChange={(e) =>
                 setFormData({ ...formData, message: e.target.value })
               }
-              className="w-full bg-[#111] border border-white/10 rounded px-4 py-3 text-off-white placeholder-slate/50 focus:border-saffron focus:outline-none transition-colors resize-none"
+              className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors resize-none"
               placeholder="Tell me about your project..."
             />
           </div>
 
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-saffron text-void font-grotesk font-semibold text-sm uppercase tracking-wider py-4 rounded hover:bg-[#E67D00] transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-grotesk font-semibold text-sm uppercase tracking-wider py-4 rounded hover:bg-primary/90 transition-colors"
           >
             <Send size={16} />
             {submitted ? "Opening Email..." : "Send Message"}
           </button>
         </form>
+        </div>
 
         {/* Social links */}
         <div className="contact-animate flex items-center justify-center gap-6 mt-12">
@@ -131,7 +207,7 @@ export default function Contact() {
             href="https://www.linkedin.com/in/muhammad-haneef-flutterdev/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-slate hover:text-saffron transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="LinkedIn"
           >
             <Linkedin size={24} />
@@ -140,14 +216,14 @@ export default function Contact() {
             href="https://github.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-slate hover:text-saffron transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="GitHub"
           >
             <Github size={24} />
           </a>
           <a
             href="tel:+923030038699"
-            className="text-slate hover:text-saffron transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Phone"
           >
             <Phone size={24} />

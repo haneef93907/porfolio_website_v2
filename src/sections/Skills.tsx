@@ -65,7 +65,7 @@ function SkillItem({ skill }: { skill: SkillCategory }) {
       headingRef.current,
       { color: "#555", opacity: 0 },
       {
-        color: "#F8F8F8",
+        color: "hsl(var(--foreground))",
         opacity: 1,
         duration: 0.75,
         ease: "power2.inOut",
@@ -94,8 +94,8 @@ function SkillItem({ skill }: { skill: SkillCategory }) {
     <div className="mb-10 last:mb-0">
       <h3
         ref={headingRef}
-        className="font-grotesk font-semibold text-xl sm:text-2xl lg:text-[28px] text-off-white mb-4"
-        style={{ color: "#555" }}
+        className="font-grotesk font-semibold text-xl sm:text-2xl lg:text-[28px] text-foreground mb-4"
+        style={{ color: "hsl(var(--muted-foreground))" }}
       >
         {skill.title}
       </h3>
@@ -103,7 +103,7 @@ function SkillItem({ skill }: { skill: SkillCategory }) {
         {skill.items.map((item) => (
           <span
             key={item}
-            className="text-sm text-slate bg-white/5 border border-white/10 px-3 py-1.5 rounded"
+            className="text-sm text-muted-foreground bg-card border border-border px-3 py-1.5 rounded"
           >
             {item}
           </span>
@@ -120,21 +120,21 @@ export default function Skills() {
     <section
       id="skills"
       ref={sectionRef}
-      className="relative bg-void py-24 sm:py-32 lg:py-40"
+      className="relative bg-background py-24 sm:py-32 lg:py-40"
     >
       <div className="max-w-[1200px] mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-12 lg:gap-16">
           {/* Left sticky heading */}
           <div className="lg:sticky lg:top-32 lg:self-start">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-slate mb-4">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
               SKILLS
             </p>
-            <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-off-white mb-4">
+            <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
               Technical
               <br />
               Arsenal
             </h2>
-            <p className="text-slate text-base leading-relaxed">
+            <p className="text-muted-foreground text-base leading-relaxed">
               What I bring to the table — a comprehensive skill set built over 3+
               years of building production-grade mobile applications.
             </p>

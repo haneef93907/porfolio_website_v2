@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { label: "Work", href: "#work" },
+  { label: "Services", href: "#services" },
   { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
   { label: "Blog", href: "/blog" },
@@ -49,7 +50,7 @@ export default function Navigation() {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             link.href.startsWith("/") ? (
               <Link
@@ -70,6 +71,13 @@ export default function Navigation() {
             )
           ))}
         </div>
+
+        <button
+          onClick={() => handleNavClick("#contact")}
+          className="hidden md:inline-flex rounded bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition hover:bg-primary/90"
+        >
+          Hire Me
+        </button>
 
         {/* Mobile menu button */}
         <button
