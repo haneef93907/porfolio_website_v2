@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { safeArray } from "../lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -92,7 +93,7 @@ function ExperienceCard({ entry }: { entry: ExperienceEntry }) {
       </div>
 
       <ul className="space-y-2">
-        {entry.highlights.map((highlight, i) => (
+        {safeArray(entry.highlights).map((highlight, i) => (
           <li key={i} className="flex gap-3 text-sm text-muted-foreground leading-relaxed">
             <span className="text-primary mt-1 shrink-0">-</span>
             <span>{highlight}</span>
@@ -118,7 +119,7 @@ export default function Experience() {
         </h2>
 
         <div className="relative space-y-8 lg:space-y-12">
-          {experiences.map((entry) => (
+          {safeArray(experiences).map((entry) => (
             <ExperienceCard key={entry.company} entry={entry} />
           ))}
         </div>

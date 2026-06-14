@@ -5,6 +5,7 @@ import Navigation from "../sections/Navigation";
 import Footer from "../sections/Footer";
 import Contact from "../sections/Contact";
 import SEO from "../components/SEO";
+import { safeArray } from "../lib/utils";
 
 export default function ProjectDetail() {
   const { slug = "" } = useParams();
@@ -98,7 +99,7 @@ export default function ProjectDetail() {
             {[
               ["Role", project.role],
               ["Timeline", project.date],
-              ["Stack", project.technologies.slice(0, 4).join(", ")],
+              ["Stack", safeArray(project.technologies).slice(0, 4).join(", ")],
               ["Result", project.impact || project.result],
             ].map(([label, value]) => (
               <div key={label} className="rounded border border-border bg-card p-5">
@@ -138,7 +139,7 @@ export default function ProjectDetail() {
               Features Developed
             </h2>
             <div className="mt-8 grid gap-4 md:grid-cols-2">
-              {project.features.map((feature) => (
+              {safeArray(project.features).map((feature) => (
                 <div key={feature} className="rounded border border-border bg-card p-5 text-sm leading-relaxed text-muted-foreground">
                   {feature}
                 </div>
@@ -153,7 +154,7 @@ export default function ProjectDetail() {
               Screenshots
             </h2>
             <div className="mt-8 grid gap-5 md:grid-cols-2">
-              {project.screenshots.map((screenshot) => (
+              {safeArray(project.screenshots).map((screenshot) => (
                 <img
                   key={screenshot}
                   src={screenshot}

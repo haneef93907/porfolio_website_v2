@@ -5,6 +5,7 @@ import { getPublishedBlogs } from '../data/blogs';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import SEO from '../components/SEO';
+import { safeArray } from '../lib/utils';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -245,7 +246,7 @@ export default function Blog() {
 
                   {/* Tags */}
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {blog.tags.slice(0, 3).map((tag) => (
+                    {safeArray(blog.tags).slice(0, 3).map((tag) => (
                       <Badge
                         key={tag}
                         variant="outline"
@@ -254,9 +255,9 @@ export default function Blog() {
                         {tag}
                       </Badge>
                     ))}
-                    {blog.tags.length > 3 && (
+                    {safeArray(blog.tags).length > 3 && (
                       <Badge variant="outline" className="text-xs bg-muted/50 border-border">
-                        +{blog.tags.length - 3}
+                        +{safeArray(blog.tags).length - 3}
                       </Badge>
                     )}
                   </div>

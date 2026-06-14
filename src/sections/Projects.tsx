@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { getPublishedProjects, type Project } from "../data/projects";
+import { safeArray } from "../lib/utils";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight, ExternalLink, Store } from "lucide-react";
@@ -41,7 +42,7 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {project.technologies.slice(0, 4).map((tech) => (
+          {safeArray(project.technologies).slice(0, 4).map((tech) => (
             <span
               key={tech}
               className="font-mono text-[11px] text-accent bg-accent/10 px-2 py-1 rounded"
@@ -78,7 +79,7 @@ function ProjectCard({ project }: { project: Project }) {
         </p>
 
         <ul className="space-y-2 mb-5">
-          {project.features.slice(0, 3).map((feature) => (
+          {safeArray(project.features).slice(0, 3).map((feature) => (
             <li key={feature} className="flex gap-2 text-sm text-muted-foreground">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
               <span className="line-clamp-2">{feature}</span>

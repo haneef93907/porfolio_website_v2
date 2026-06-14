@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { safeArray } from "../lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -100,7 +101,7 @@ function SkillItem({ skill }: { skill: SkillCategory }) {
         {skill.title}
       </h3>
       <div ref={itemsRef} className="flex flex-wrap gap-2">
-        {skill.items.map((item) => (
+        {safeArray(skill.items).map((item) => (
           <span
             key={item}
             className="text-sm text-muted-foreground bg-card border border-border px-3 py-1.5 rounded"
@@ -142,7 +143,7 @@ export default function Skills() {
 
           {/* Right scrolling skills */}
           <div>
-            {skills.map((skill) => (
+            {safeArray(skills).map((skill) => (
               <SkillItem key={skill.title} skill={skill} />
             ))}
           </div>

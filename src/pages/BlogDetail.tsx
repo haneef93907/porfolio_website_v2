@@ -4,6 +4,7 @@ import { getBlogBySlug } from "../data/blogs";
 import Navigation from "../sections/Navigation";
 import Footer from "../sections/Footer";
 import SEO from "../components/SEO";
+import { safeArray } from "../lib/utils";
 
 function renderMarkdown(content: string) {
   return content
@@ -110,7 +111,7 @@ export default function BlogDetail() {
           />
           <div className="mt-10">{renderMarkdown(blog.content)}</div>
           <div className="mt-10 flex flex-wrap gap-2">
-            {blog.tags.map((tag) => (
+            {safeArray(blog.tags).map((tag) => (
               <span key={tag} className="rounded bg-secondary px-3 py-1 text-xs text-muted-foreground">
                 {tag}
               </span>
