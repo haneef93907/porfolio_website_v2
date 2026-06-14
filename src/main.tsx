@@ -4,13 +4,16 @@ import { HashRouter } from 'react-router'
 import { ThemeProvider } from './context/ThemeContext'
 import './index.css'
 import App from './App.tsx'
+import AppErrorBoundary from './components/AppErrorBoundary.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <HashRouter>
-        <App />
-      </HashRouter>
-    </ThemeProvider>
+    <AppErrorBoundary>
+      <ThemeProvider>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </ThemeProvider>
+    </AppErrorBoundary>
   </StrictMode>,
 )

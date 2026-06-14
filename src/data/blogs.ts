@@ -1,3 +1,5 @@
+import { safeGetStorage, safeSetStorage } from "../lib/safeStorage";
+
 export interface BlogPost {
   id: string;
   slug: string;
@@ -502,7 +504,7 @@ export const flutterBlogs = defaultBlogs;
 
 export function getBlogs(): BlogPost[] {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = safeGetStorage("local", STORAGE_KEY);
     if (stored) {
       return JSON.parse(stored).map(normalizeBlog);
     }
@@ -523,7 +525,7 @@ export function getBlogBySlug(slug: string): BlogPost | undefined {
 }
 
 export function saveBlogs(blogs: BlogPost[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(blogs));
+  safeSetStorage("local", STORAGE_KEY, JSON.stringify(blogs));
 }
 
 export function addBlog(blog: Omit<BlogPost, "id">): BlogPost[] {

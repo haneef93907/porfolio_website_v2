@@ -17,6 +17,7 @@ import {
   updateProject,
   type Project,
 } from "../data/projects";
+import { safeGetStorage, safeRemoveStorage, safeSetStorage } from "../lib/safeStorage";
 import {
   ArrowLeft,
   BarChart3,
@@ -137,7 +138,7 @@ function imageUpload(setValue: (value: string) => void) {
 }
 
 export default function Admin() {
-  const [loggedIn, setLoggedIn] = useState(() => sessionStorage.getItem("portfolio-admin") === "true");
+  const [loggedIn, setLoggedIn] = useState(() => safeGetStorage("session", "portfolio-admin") === "true");
   const [password, setPassword] = useState("");
   const [tab, setTab] = useState<Tab>("overview");
   const [projects, setProjects] = useState<Project[]>(() => getProjects());
@@ -159,7 +160,7 @@ export default function Admin() {
     event.preventDefault();
     const expected = import.meta.env.VITE_ADMIN_PASSWORD || "admin123";
     if (password === expected) {
-      sessionStorage.setItem("portfolio-admin", "true");
+      safeSetStorage("session", "portfolio-admin", "true");
       setLoggedIn(true);
     } else {
       alert("Incorrect password");
@@ -261,7 +262,7 @@ export default function Admin() {
           </div>
           <button
             onClick={() => {
-              sessionStorage.removeItem("portfolio-admin");
+              safeRemoveStorage("session", "portfolio-admin");
               setLoggedIn(false);
             }}
             className="rounded border border-border px-3 py-2 text-xs uppercase tracking-wider text-muted-foreground hover:text-primary"

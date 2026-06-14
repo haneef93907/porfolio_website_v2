@@ -1,3 +1,5 @@
+import { safeGetStorage, safeSetStorage } from "../lib/safeStorage";
+
 export interface Project {
   id: string;
   slug: string;
@@ -285,7 +287,7 @@ const STORAGE_KEY = "portfolio-projects-v3";
 
 export function getProjects(): Project[] {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = safeGetStorage("local", STORAGE_KEY);
     if (stored) {
       return JSON.parse(stored).map(normalizeProject);
     }
@@ -308,7 +310,7 @@ export function getProjectBySlug(slug: string): Project | undefined {
 }
 
 export function saveProjects(projects: Project[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  safeSetStorage("local", STORAGE_KEY, JSON.stringify(projects));
 }
 
 export function addProject(project: Omit<Project, "id">): Project[] {

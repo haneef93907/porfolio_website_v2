@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { safeGetStorage, safeSetStorage } from '../lib/safeStorage';
 
 type Theme = 'light' | 'dark';
 
@@ -11,7 +12,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('theme') as Theme | null;
+    const stored = safeGetStorage('local', 'theme') as Theme | null;
     if (stored) return stored;
     return 'light';
   });
@@ -20,7 +21,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     root.setAttribute('data-theme', theme);
     root.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('theme', theme);
+    safeSetStorage('local', 'theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
