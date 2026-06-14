@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import {
   addBlog,
@@ -140,15 +140,10 @@ export default function Admin() {
   const [loggedIn, setLoggedIn] = useState(() => sessionStorage.getItem("portfolio-admin") === "true");
   const [password, setPassword] = useState("");
   const [tab, setTab] = useState<Tab>("overview");
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [projects, setProjects] = useState<Project[]>(() => getProjects());
+  const [blogs, setBlogs] = useState<BlogPost[]>(() => getBlogs());
   const [projectForm, setProjectForm] = useState<ProjectForm | null>(null);
   const [blogForm, setBlogForm] = useState<BlogForm | null>(null);
-
-  useEffect(() => {
-    setProjects(getProjects());
-    setBlogs(getBlogs());
-  }, []);
 
   const stats = useMemo(
     () => [
