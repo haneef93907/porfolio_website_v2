@@ -72,7 +72,7 @@ export default function Hero() {
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_38%,hsl(var(--primary)/0.11),transparent_28%),radial-gradient(circle_at_84%_66%,hsl(var(--accent)/0.11),transparent_34%)]" />
 
-      <div className="relative z-10 w-full lg:w-[52%] flex flex-col justify-center px-6 sm:px-10 lg:px-12 xl:px-16 py-24">
+      <div className="relative z-10 w-full lg:w-[44%] flex flex-col justify-center px-6 sm:px-10 lg:px-12 xl:px-16 py-24">
         <div className="max-w-2xl">
           <p className="hero-label inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-primary mb-5">
             <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_24px_hsl(var(--primary))]" />
@@ -146,7 +146,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hero-visual hidden lg:block absolute inset-y-0 left-[46%] right-0 opacity-90">
+      <div className="hero-visual hidden lg:block absolute inset-y-0 left-[52%] right-0 opacity-90">
         <DigitFallClock />
       </div>
 

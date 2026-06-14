@@ -59,11 +59,11 @@ export default function DigitFallClock() {
         alpha: 0.12 + Math.random() * 0.34,
       }));
 
-      const cardW = Math.min(160, Math.max(118, width * 0.21));
+      const cardW = Math.min(150, Math.max(112, width * 0.2));
       const cardH = 74;
       const phoneW = 210;
       const cx = width * 0.5;
-      const gap = Math.max(30, width * 0.05);
+      const gap = Math.max(24, width * 0.045);
       const leftX = Math.max(18, cx - phoneW / 2 - gap - cardW);
       const rightX = Math.min(width - cardW - 18, cx + phoneW / 2 + gap);
       const topY = Math.max(34, height * 0.13);
