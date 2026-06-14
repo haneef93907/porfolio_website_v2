@@ -13,7 +13,7 @@ function ProjectCard({ project }: { project: Project }) {
 
   return (
     <article
-      className="project-card group relative bg-card border border-border rounded overflow-hidden transition-all duration-300 hover:border-primary/50 motion-card"
+      className="project-card group relative flex h-full min-h-0 flex-col bg-card border border-border rounded overflow-hidden transition-all duration-300 hover:border-primary/50 motion-card"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -33,12 +33,12 @@ function ProjectCard({ project }: { project: Project }) {
         )}
       </div>
 
-      <div className="p-5 sm:p-6">
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3 mb-4">
+          <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary break-words">
             {project.category}
           </span>
-          <span className="text-xs text-muted-foreground">{project.date}</span>
+          <span className="text-xs text-muted-foreground shrink-0">{project.date}</span>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
@@ -53,7 +53,7 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
 
         <div className="flex items-start justify-between gap-3 mb-2">
-          <h3 className="font-grotesk font-semibold text-xl sm:text-2xl text-foreground group-hover:text-primary transition-colors">
+          <h3 className="min-w-0 font-grotesk font-semibold text-xl sm:text-2xl text-foreground group-hover:text-primary transition-colors break-words">
             {project.title}
           </h3>
           {(project.links.website || project.links.playStore || project.links.appStore || project.link) && (
@@ -74,7 +74,7 @@ function ProjectCard({ project }: { project: Project }) {
           {project.description}
         </p>
 
-        <p className="text-sm text-foreground mb-4">
+        <p className="text-sm text-foreground mb-4 break-words">
           <span className="text-muted-foreground">My role:</span> {project.role}
         </p>
 
@@ -82,7 +82,7 @@ function ProjectCard({ project }: { project: Project }) {
           {safeArray(project.features).slice(0, 3).map((feature) => (
             <li key={feature} className="flex gap-2 text-sm text-muted-foreground">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-              <span className="line-clamp-2">{feature}</span>
+              <span className="line-clamp-2 break-words">{feature}</span>
             </li>
           ))}
         </ul>
@@ -93,7 +93,7 @@ function ProjectCard({ project }: { project: Project }) {
           </p>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="mt-auto flex flex-col sm:flex-row gap-3">
           <Link
             to={`/projects/${project.slug}`}
             className="inline-flex flex-1 items-center justify-center gap-2 rounded bg-primary px-4 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition hover:bg-primary/90"
@@ -127,47 +127,30 @@ export default function Projects() {
     if (!sectionRef.current || !gridRef.current || projects.length === 0) return;
 
     const cards = gridRef.current.querySelectorAll(".project-card");
-    const isMobile = window.innerWidth < 768;
+    gsap.set(cards, {
+      clearProps: "transform",
+      rotationX: 0,
+      rotationY: 0,
+      z: 0,
+      yPercent: 0,
+    });
 
-    if (isMobile) {
-      // Simple fade-in for mobile
-      gsap.fromTo(
-        cards,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.1,
-          duration: 0.6,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-            toggleActions: "play none none none",
-          },
-        }
-      );
-    } else {
-      // Cylinder reveal effect for desktop
-      gsap.fromTo(
-        cards,
-        { rotationX: 70, z: -800, opacity: 0, yPercent: 100 },
-        {
-          rotationX: -10,
-          z: 0,
-          opacity: 1,
-          yPercent: 0,
-          ease: "power2.inOut",
-          stagger: 0.06,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 60%",
-            end: `+=${window.innerHeight * (projects.length * 0.08)}`,
-            scrub: true,
-          },
-        }
-      );
-    }
+    gsap.fromTo(
+      cards,
+      { opacity: 0, y: 36 },
+      {
+        opacity: 1,
+        y: 0,
+        stagger: 0.08,
+        duration: 0.65,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: gridRef.current,
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+      }
+    );
 
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
@@ -195,8 +178,7 @@ export default function Projects() {
 
         <div
           ref={gridRef}
-          className="projects-grid grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8"
-          style={{ perspective: "1000px" }}
+          className="projects-grid relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8"
         >
           {projects.map((project) => (
             <ProjectCard key={project.id} project={project} />

@@ -12,36 +12,134 @@ interface SkillCategory {
 
 const skills: SkillCategory[] = [
   {
-    title: "Flutter & Dart",
+    title: "Core Flutter Expertise",
     items: [
+      "Flutter 4.x / 5.x",
+      "Dart",
+      "Object-Oriented Programming",
       "Cross-Platform Development",
-      "Offline-First Architecture",
-      "State Management: BLoC, Riverpod, Provider, GetX",
+      "Android, iOS & Web Apps",
+      "Scalable App Architecture",
+      "Release Management",
+      "Production-Grade Delivery",
+      "Git Version Control",
     ],
   },
   {
-    title: "Backend & APIs",
-    items: ["Node.js", "FastAPI", "Express", "REST APIs", "GraphQL"],
+    title: "Architecture & Design Principles",
+    items: [
+      "Clean Architecture",
+      "SOLID Principles",
+      "Design Patterns",
+      "Modular Architecture",
+      "MVC",
+      "MVVM",
+      "Dependency Injection",
+      "Separation of Concerns",
+    ],
+  },
+  {
+    title: "State Management",
+    items: ["BLoC", "Riverpod", "Provider", "GetX"],
+  },
+  {
+    title: "Backend, APIs & Security",
+    items: [
+      "REST APIs",
+      "GraphQL",
+      "Python FastAPI",
+      "Node.js Express",
+      "OAuth 2",
+      "JWT Authentication",
+      "Token-Based Security",
+    ],
   },
   {
     title: "Databases",
-    items: ["Firebase Firestore", "MongoDB", "SQLite", "Hive", "Supabase"],
+    items: [
+      "Firebase Firestore",
+      "MongoDB",
+      "SQLite",
+      "Hive",
+      "Shared Preferences",
+      "Supabase",
+    ],
   },
   {
-    title: "Cloud & DevOps",
-    items: ["AWS", "Azure", "CI/CD", "Codemagic", "Bitrise", "Fastlane"],
-  },
-  {
-    title: "Mobile Native",
-    items: ["Android Native", "SwiftUI"],
-  },
-  {
-    title: "Testing",
+    title: "Testing & Quality Assurance",
     items: [
       "Unit Testing",
       "Widget Testing",
       "Integration Testing",
       "Mockito",
+      "Debugging Strategies",
+    ],
+  },
+  {
+    title: "Performance Optimization",
+    items: [
+      "App Size Optimization",
+      "Lazy Loading",
+      "Memory Optimization",
+      "UI Rendering Optimization",
+      "Flutter DevTools Profiling",
+    ],
+  },
+  {
+    title: "Cloud & DevOps",
+    items: [
+      "Firebase",
+      "AWS",
+      "Azure",
+      "DigitalOcean",
+      "Codemagic",
+      "Bitrise",
+      "Fastlane",
+      "GitHub Actions",
+      "CI/CD Pipelines",
+      "Automated Build Deployment",
+    ],
+  },
+  {
+    title: "Tools & Platforms",
+    items: [
+      "Git",
+      "GitHub",
+      "Bitbucket",
+      "Visual Studio Code",
+      "Android Studio",
+      "Xcode",
+    ],
+  },
+  {
+    title: "Notifications & Real-Time Messaging",
+    items: [
+      "Firebase Cloud Messaging",
+      "OneSignal",
+      "WebSocket",
+      "Push Notification Systems",
+    ],
+  },
+  {
+    title: "Monitoring & Analytics",
+    items: [
+      "Crashlytics",
+      "Crash Reporting",
+      "Firebase Analytics",
+      "Firebase Services",
+    ],
+  },
+  {
+    title: "Agile & Collaboration",
+    items: [
+      "Agile / Scrum",
+      "Sprint Planning",
+      "Kanban",
+      "Jira",
+      "Trello",
+      "Code Reviews",
+      "Technical Documentation",
+      "Team Collaboration",
     ],
   },
 ];
@@ -134,8 +232,9 @@ export default function Skills() {
               Arsenal
             </h2>
             <p className="text-muted-foreground text-base leading-relaxed">
-              What I bring to the table — a comprehensive skill set built over 3+
-              years of building production-grade mobile applications.
+              What I bring to the table — a CV-aligned skill set built around
+              production-grade Flutter apps, clean architecture, API
+              integrations, performance, deployment, and long-term app quality.
             </p>
           </div>
 
