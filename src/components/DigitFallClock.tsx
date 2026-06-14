@@ -56,7 +56,7 @@ export default function DigitFallClock() {
         radius: Math.min(width, height) * (0.18 + Math.random() * 0.34),
         speed: 0.00045 + Math.random() * 0.00075,
         size: 1.4 + Math.random() * 2.8,
-        alpha: 0.22 + Math.random() * 0.52,
+        alpha: 0.12 + Math.random() * 0.34,
       }));
 
       const cardW = Math.min(160, Math.max(118, width * 0.21));
@@ -216,20 +216,22 @@ export default function DigitFallClock() {
       context.stroke();
       context.shadowBlur = 0;
 
-      context.shadowColor = `${card.color}55`;
-      context.shadowBlur = 20;
+      context.shadowColor = `${card.color}40`;
+      context.shadowBlur = 18;
       roundedRect(context, x, y, card.w, card.h, 12);
       const cardGradient = context.createLinearGradient(x, y, x + card.w, y + card.h);
-      cardGradient.addColorStop(0, "rgba(255,255,255,0.15)");
-      cardGradient.addColorStop(1, "rgba(5,18,27,0.38)");
+      cardGradient.addColorStop(0, "rgba(245,250,255,0.84)");
+      cardGradient.addColorStop(0.55, "rgba(221,236,243,0.78)");
+      cardGradient.addColorStop(1, "rgba(120,148,158,0.72)");
       context.fillStyle = cardGradient;
       context.fill();
-      context.strokeStyle = `${card.color}88`;
+      context.strokeStyle = `${card.color}aa`;
+      context.lineWidth = 1.8;
       context.stroke();
       context.shadowBlur = 0;
 
       roundedRect(context, x + 14, y + 15, 25, 25, 7);
-      context.fillStyle = `${card.color}33`;
+      context.fillStyle = "rgba(255,255,255,0.66)";
       context.fill();
 
       context.fillStyle = card.color;
@@ -237,14 +239,17 @@ export default function DigitFallClock() {
       context.textAlign = "center";
       context.fillText(card.icon, x + 26.5, y + 31);
 
-      context.fillStyle = "rgba(255,255,255,0.88)";
-      context.font = '700 10.5px "Space Grotesk", sans-serif';
+      context.shadowColor = "rgba(255,255,255,0.9)";
+      context.shadowBlur = 4;
+      context.fillStyle = "rgba(15,23,42,0.92)";
+      context.font = '800 10.5px "Space Grotesk", sans-serif';
       context.textAlign = "left";
       context.fillText(card.label, x + 48, y + 28);
 
-      context.fillStyle = "rgba(255,255,255,0.58)";
-      context.font = '500 8.5px "Inter", sans-serif';
+      context.fillStyle = "rgba(38,55,72,0.78)";
+      context.font = '700 8.5px "Inter", sans-serif';
       context.fillText(card.subtitle, x + 48, y + 47);
+      context.shadowBlur = 0;
       context.restore();
     }
 
