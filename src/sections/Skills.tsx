@@ -61,15 +61,14 @@ function SkillItem({ skill }: { skill: SkillCategory }) {
       },
     });
 
-    // Strikethrough reveal animation
     tl.fromTo(
       headingRef.current,
-      { color: "#555", opacity: 0 },
+      { opacity: 0, y: 12 },
       {
-        color: "hsl(var(--foreground))",
         opacity: 1,
+        y: 0,
         duration: 0.75,
-        ease: "power2.inOut",
+        ease: "power2.out",
       }
     );
 
@@ -96,7 +95,6 @@ function SkillItem({ skill }: { skill: SkillCategory }) {
       <h3
         ref={headingRef}
         className="font-grotesk font-semibold text-xl sm:text-2xl lg:text-[28px] text-foreground mb-4"
-        style={{ color: "hsl(var(--muted-foreground))" }}
       >
         {skill.title}
       </h3>
