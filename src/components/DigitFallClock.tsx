@@ -1,194 +1,229 @@
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-const CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@#$%^&*";
-const FONT_SIZE = 16;
-const GLOW_COLOR = "#FF8C00";
-const DIM_COLOR = "#111111";
-const BG_COLOR = "#0A0A0A";
+interface Particle {
+  angle: number;
+  radius: number;
+  speed: number;
+  size: number;
+  alpha: number;
+}
 
-const DIGIT_MAP: Record<number, number[]> = {
-  0: [1,2,3,5,9,10,13,14,15,19,20,21,24,25,29,30,31,34,35,39,40,41,45,46,47,49,50],
-  1: [1,2,7,12,17,22,27,32,37,42,47,52],
-  2: [1,2,3,5,9,14,16,17,18,22,26,30,34,38,42,46,50],
-  3: [1,2,3,5,9,14,16,17,18,24,29,34,35,39,40,41,45,46,47],
-  4: [3,7,8,11,13,15,18,20,21,22,23,28,33,38,43,48],
-  5: [0,1,2,3,4,5,10,15,16,17,18,19,24,29,34,35,39,40,41,45,46,47],
-  6: [1,2,3,5,9,10,15,16,17,18,19,24,29,30,34,35,39,40,41,45,46,47],
-  7: [0,1,2,3,4,9,14,18,22,26,30,34,38,42,46],
-  8: [1,2,3,5,9,10,14,16,17,18,22,26,27,29,30,34,35,39,40,41,45,46,47],
-  9: [1,2,3,5,9,10,14,16,17,18,19,24,29,34,35,39,40,41,45,46,47],
-};
-
-interface Column {
+interface CardNode {
+  label: string;
   x: number;
   y: number;
-  speed: number;
-  chars: string[];
-  isTargetDigit: boolean;
-  opacity: number;
+  w: number;
+  h: number;
+  phase: number;
 }
+
+const BG = "#111214";
 
 export default function DigitFallClock() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animFrameRef = useRef<number>(0);
-  const columnsRef = useRef<Column[]>([]);
-  const lastTimeRef = useRef<number>(0);
+  const frameRef = useRef<number>(0);
+  const particlesRef = useRef<Particle[]>([]);
+  const cardsRef = useRef<CardNode[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = canvas?.parentElement;
+    if (!canvas || !container) return;
 
-    canvas.style.transform = "scaleY(-1)";
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    const container = canvas.parentElement;
-    if (!container) return;
+    const canvasElement = canvas;
+    const containerElement = container;
+    const context = ctx;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-    const resize = () => {
-      canvas.width = container.clientWidth;
-      canvas.height = container.clientHeight;
-      initColumns(canvas.width, canvas.height);
-    };
-
-    resize();
-    window.addEventListener("resize", resize);
-
-    function initColumns(canvasWidth: number, canvasHeight: number) {
-      const cols = Math.floor(canvasWidth / FONT_SIZE);
-      const digitWidth = FONT_SIZE * 8;
-      const digitHeight = FONT_SIZE * 11;
-      const offsetX = (canvasWidth - digitWidth * 2 - FONT_SIZE * 2) / 2;
-      const _offsetY = (canvasHeight - digitHeight) / 2;
-      void _offsetY;
-
-      columnsRef.current = [];
-
-      for (let i = 0; i < cols; i++) {
-        const isHourDigit = i >= offsetX / FONT_SIZE && i < (offsetX + digitWidth) / FONT_SIZE;
-        const isMinuteDigit = i >= (offsetX + digitWidth + FONT_SIZE * 2) / FONT_SIZE && i < (offsetX + digitWidth * 2 + FONT_SIZE * 2) / FONT_SIZE;
-
-        const x = i * FONT_SIZE;
-        const y = -Math.random() * 1000;
-
-        const speed = isHourDigit || isMinuteDigit
-          ? 1 + Math.random() * 1.5
-          : 2 + Math.random() * 3;
-
-        columnsRef.current.push({
-          x,
-          y,
-          speed,
-          chars: CHARS.split(""),
-          isTargetDigit: isHourDigit || isMinuteDigit,
-          opacity: Math.random() * 0.5 + 0.1,
-        });
-      }
+    function resize() {
+      const width = Math.max(containerElement.clientWidth, 320);
+      const height = Math.max(containerElement.clientHeight, 320);
+      canvasElement.width = Math.floor(width * pixelRatio);
+      canvasElement.height = Math.floor(height * pixelRatio);
+      canvasElement.style.width = `${width}px`;
+      canvasElement.style.height = `${height}px`;
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      seedScene(width, height);
     }
 
-    function drawDigit(
-      ctx: CanvasRenderingContext2D,
-      digit: number,
-      offsetX: number,
-      offsetY: number,
-      fontSize: number,
-      alpha: number,
-      isHighlight: boolean
-    ) {
-      const positions = DIGIT_MAP[digit];
-      if (!positions) return;
-      const char = isHighlight ? "0" : "1";
+    function seedScene(width: number, height: number) {
+      particlesRef.current = Array.from({ length: 46 }, (_, index) => ({
+        angle: (Math.PI * 2 * index) / 46,
+        radius: Math.min(width, height) * (0.18 + Math.random() * 0.34),
+        speed: 0.00045 + Math.random() * 0.00075,
+        size: 1.4 + Math.random() * 2.8,
+        alpha: 0.22 + Math.random() * 0.52,
+      }));
 
-      for (const pos of positions) {
-        const col = pos % 5;
-        const row = Math.floor(pos / 5);
-        const x = offsetX + col * fontSize;
-        const y = offsetY + row * fontSize;
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = isHighlight ? GLOW_COLOR : DIM_COLOR;
-        ctx.fillText(char, x, y);
+      cardsRef.current = [
+        { label: "Firebase", x: width * 0.15, y: height * 0.24, w: 128, h: 54, phase: 0.4 },
+        { label: "REST API", x: width * 0.68, y: height * 0.22, w: 122, h: 54, phase: 1.6 },
+        { label: "Stripe", x: width * 0.18, y: height * 0.68, w: 106, h: 52, phase: 2.2 },
+        { label: "Deploy", x: width * 0.66, y: height * 0.68, w: 114, h: 52, phase: 3.1 },
+      ];
+    }
+
+    function roundedRect(
+      context: CanvasRenderingContext2D,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      radius: number
+    ) {
+      context.beginPath();
+      context.moveTo(x + radius, y);
+      context.lineTo(x + width - radius, y);
+      context.quadraticCurveTo(x + width, y, x + width, y + radius);
+      context.lineTo(x + width, y + height - radius);
+      context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      context.lineTo(x + radius, y + height);
+      context.quadraticCurveTo(x, y + height, x, y + height - radius);
+      context.lineTo(x, y + radius);
+      context.quadraticCurveTo(x, y, x + radius, y);
+      context.closePath();
+    }
+
+    function drawPhone(cx: number, cy: number, time: number) {
+      const bob = Math.sin(time * 0.0014) * 8;
+      const phoneW = 180;
+      const phoneH = 350;
+      const x = cx - phoneW / 2;
+      const y = cy - phoneH / 2 + bob;
+
+      context.save();
+      context.shadowColor = "rgba(255,140,0,0.45)";
+      context.shadowBlur = 38;
+      roundedRect(context, x, y, phoneW, phoneH, 30);
+      context.fillStyle = "rgba(10, 10, 12, 0.86)";
+      context.fill();
+      context.lineWidth = 2;
+      context.strokeStyle = "rgba(255,255,255,0.18)";
+      context.stroke();
+
+      roundedRect(context, x + 18, y + 34, phoneW - 36, phoneH - 68, 18);
+      const screenGradient = context.createLinearGradient(x, y, x + phoneW, y + phoneH);
+      screenGradient.addColorStop(0, "rgba(0,191,255,0.14)");
+      screenGradient.addColorStop(0.45, "rgba(255,140,0,0.16)");
+      screenGradient.addColorStop(1, "rgba(255,255,255,0.05)");
+      context.fillStyle = screenGradient;
+      context.fill();
+
+      context.shadowBlur = 0;
+      context.fillStyle = "rgba(255,255,255,0.88)";
+      context.font = '700 18px "Space Grotesk", sans-serif';
+      context.textAlign = "center";
+      context.fillText("Flutter", cx, y + 94);
+
+      context.font = '500 12px "JetBrains Mono", monospace';
+      context.fillStyle = "rgba(255,140,0,0.95)";
+      context.fillText("ANDROID  IOS", cx, y + 120);
+
+      for (let i = 0; i < 4; i++) {
+        const rowY = y + 160 + i * 34;
+        const pulse = 0.45 + Math.sin(time * 0.002 + i) * 0.18;
+        roundedRect(context, x + 38, rowY, phoneW - 76, 16, 8);
+        context.fillStyle = `rgba(255,255,255,${0.09 + pulse * 0.08})`;
+        context.fill();
+        roundedRect(context, x + 38, rowY, (phoneW - 76) * (0.48 + i * 0.1), 16, 8);
+        context.fillStyle = i % 2 ? "rgba(0,191,255,0.38)" : "rgba(255,140,0,0.45)";
+        context.fill();
       }
-      ctx.globalAlpha = 1;
+
+      context.beginPath();
+      context.arc(cx, y + phoneH - 32, 5, 0, Math.PI * 2);
+      context.fillStyle = "rgba(255,255,255,0.35)";
+      context.fill();
+      context.restore();
+    }
+
+    function drawCard(card: CardNode, cx: number, cy: number, time: number) {
+      const floatY = Math.sin(time * 0.0017 + card.phase) * 9;
+      const x = card.x;
+      const y = card.y + floatY;
+
+      context.save();
+      context.beginPath();
+      context.moveTo(cx, cy);
+      context.lineTo(x + card.w / 2, y + card.h / 2);
+      context.strokeStyle = "rgba(255,140,0,0.16)";
+      context.lineWidth = 1;
+      context.stroke();
+
+      context.shadowColor = "rgba(0,191,255,0.22)";
+      context.shadowBlur = 18;
+      roundedRect(context, x, y, card.w, card.h, 12);
+      context.fillStyle = "rgba(255,255,255,0.075)";
+      context.fill();
+      context.strokeStyle = "rgba(255,255,255,0.16)";
+      context.stroke();
+      context.shadowBlur = 0;
+
+      context.fillStyle = "rgba(255,255,255,0.88)";
+      context.font = '600 13px "Space Grotesk", sans-serif';
+      context.textAlign = "center";
+      context.fillText(card.label, x + card.w / 2, y + 33);
+      context.restore();
     }
 
     function draw(time: number) {
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      const width = canvasElement.clientWidth;
+      const height = canvasElement.clientHeight;
+      const cx = width * 0.5;
+      const cy = height * 0.52;
 
-      // Frame skip for performance
-      const delta = time - lastTimeRef.current;
-      if (delta < 16) {
-        animFrameRef.current = requestAnimationFrame(draw);
-        return;
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = BG;
+      context.fillRect(0, 0, width, height);
+
+      const bgGradient = context.createRadialGradient(cx, cy, 0, cx, cy, Math.max(width, height) * 0.7);
+      bgGradient.addColorStop(0, "rgba(255,140,0,0.15)");
+      bgGradient.addColorStop(0.34, "rgba(0,191,255,0.08)");
+      bgGradient.addColorStop(1, "rgba(17,18,20,0)");
+      context.fillStyle = bgGradient;
+      context.fillRect(0, 0, width, height);
+
+      context.save();
+      context.translate(cx, cy);
+      for (const ring of [0.32, 0.48]) {
+        context.beginPath();
+        context.ellipse(0, 0, width * ring, height * ring * 0.52, Math.sin(time * 0.0002) * 0.1, 0, Math.PI * 2);
+        context.strokeStyle = ring > 0.4 ? "rgba(0,191,255,0.13)" : "rgba(255,140,0,0.18)";
+        context.lineWidth = 1;
+        context.stroke();
       }
-      lastTimeRef.current = time;
+      context.restore();
 
-      const now = new Date();
-      const h = now.getHours();
-      const m = now.getMinutes();
-
-      const canvasW = canvas.width;
-      const canvasH = canvas.height;
-
-      ctx.fillStyle = BG_COLOR;
-      ctx.fillRect(0, 0, canvasW, canvasH);
-
-      ctx.font = `${FONT_SIZE}px "JetBrains Mono", monospace`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      // Glow/shadow pass for digits
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = GLOW_COLOR;
-      ctx.fillStyle = GLOW_COLOR;
-
-      // Hour tens
-      drawDigit(ctx, Math.floor(h / 10), canvasW / 2 - FONT_SIZE * 10, canvasH / 2 - FONT_SIZE * 5.5, FONT_SIZE, 1, true);
-      // Hour ones
-      drawDigit(ctx, h % 10, canvasW / 2 - FONT_SIZE * 5, canvasH / 2 - FONT_SIZE * 5.5, FONT_SIZE, 1, true);
-      // Minute tens
-      drawDigit(ctx, Math.floor(m / 10), canvasW / 2 + FONT_SIZE * 2, canvasH / 2 - FONT_SIZE * 5.5, FONT_SIZE, 1, true);
-      // Minute ones
-      drawDigit(ctx, m % 10, canvasW / 2 + FONT_SIZE * 7, canvasH / 2 - FONT_SIZE * 5.5, FONT_SIZE, 1, true);
-
-      ctx.shadowBlur = 0;
-
-      // Blinking colon
-      ctx.fillStyle = GLOW_COLOR;
-      const blink = Math.sin(Date.now() / 200) > 0;
-      if (blink) {
-        ctx.fillText(":", canvasW / 2 - FONT_SIZE * 0.5, canvasH / 2 - FONT_SIZE * 2);
-        ctx.fillText(":", canvasW / 2 - FONT_SIZE * 0.5, canvasH / 2 + FONT_SIZE * 2);
+      for (const particle of particlesRef.current) {
+        particle.angle += prefersReducedMotion ? 0 : particle.speed * 16;
+        const px = cx + Math.cos(particle.angle) * particle.radius;
+        const py = cy + Math.sin(particle.angle) * particle.radius * 0.48;
+        context.beginPath();
+        context.arc(px, py, particle.size, 0, Math.PI * 2);
+        context.fillStyle = `rgba(255,140,0,${particle.alpha})`;
+        context.fill();
       }
 
-      // Falling columns
-      for (const col of columnsRef.current) {
-        for (let j = 0; j < 15; j++) {
-          const charY = col.y - j * FONT_SIZE;
-          if (charY < 0 || charY > canvasH) continue;
-
-          const isVisible = col.isTargetDigit || (j === 0 && Math.random() > 0.95);
-          if (!isVisible) continue;
-
-          const alpha = j === 0 ? 1 : ((15 - j) / 15) * col.opacity;
-          ctx.globalAlpha = alpha;
-          ctx.fillStyle = col.isTargetDigit ? GLOW_COLOR : DIM_COLOR;
-          ctx.fillText(col.chars[Math.floor(Math.random() * col.chars.length)], col.x, charY);
-        }
-        ctx.globalAlpha = 1;
-
-        col.y += col.speed;
-        if (col.y > canvasH + 200) {
-          col.y = -Math.random() * 500;
-        }
+      drawPhone(cx, cy, time);
+      for (const card of cardsRef.current) {
+        drawCard(card, cx, cy, time);
       }
 
-      animFrameRef.current = requestAnimationFrame(draw);
+      if (!prefersReducedMotion) {
+        frameRef.current = requestAnimationFrame(draw);
+      }
     }
 
-    animFrameRef.current = requestAnimationFrame(draw);
+    resize();
+    window.addEventListener("resize", resize);
+    frameRef.current = requestAnimationFrame(draw);
 
     return () => {
-      cancelAnimationFrame(animFrameRef.current);
+      cancelAnimationFrame(frameRef.current);
       window.removeEventListener("resize", resize);
     };
   }, []);
@@ -197,11 +232,7 @@ export default function DigitFallClock() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "block",
-      }}
+      style={{ width: "100%", height: "100%", display: "block" }}
     />
   );
 }
