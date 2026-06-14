@@ -44,9 +44,9 @@ export default function Navigation() {
     <nav
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         scrolled
-          ? "bg-background/95 shadow-sm"
-          : "bg-background/82"
-      } backdrop-blur-xl border-b border-border/70 text-foreground`}
+          ? "bg-background shadow-sm"
+          : "bg-background/95 shadow-sm"
+      } backdrop-blur-xl border-b border-border text-foreground`}
     >
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
         <Link
