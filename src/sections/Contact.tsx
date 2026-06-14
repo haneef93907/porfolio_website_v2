@@ -1,9 +1,21 @@
 import { useState, useRef, useEffect } from "react";
-import { Linkedin, Github, Phone, Mail, Send, MessageCircle } from "lucide-react";
+import {
+  Linkedin,
+  Github,
+  Phone,
+  Mail,
+  Send,
+  MessageCircle,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
+
+type SubmitStatus = "idle" | "sending" | "sent" | "error";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -13,7 +25,7 @@ export default function Contact() {
     budget: "$1k - $3k",
     message: "",
   });
-  const [submitted, setSubmitted] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,17 +50,73 @@ export default function Contact() {
     );
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { name, email, projectType, budget, message } = formData;
-    const subject = `Flutter Project Inquiry from ${name}`;
-    const body = `Name: ${name}\nEmail: ${email}\nProject Type: ${projectType}\nBudget Range: ${budget}\n\nMessage:\n${message}`;
-    window.location.href = `mailto:haneef93907@gmail.com?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    const payload = {
+      name,
+      email,
+      projectType,
+      budget,
+      message,
+      _subject: `Flutter Project Inquiry from ${name}`,
+      _template: "table",
+      _captcha: "false",
+    };
+
+    setSubmitStatus("sending");
+
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/haneef93907@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Message could not be sent.");
+      }
+
+      setSubmitStatus("sent");
+      setFormData({
+        name: "",
+        email: "",
+        projectType: "MVP Development",
+        budget: "$1k - $3k",
+        message: "",
+      });
+      setTimeout(() => setSubmitStatus("idle"), 4500);
+    } catch {
+      const subject = `Flutter Project Inquiry from ${name}`;
+      const body = `Name: ${name}\nEmail: ${email}\nProject Type: ${projectType}\nBudget Range: ${budget}\n\nMessage:\n${message}`;
+      window.location.href = `mailto:haneef93907@gmail.com?subject=${encodeURIComponent(
+        subject
+      )}&body=${encodeURIComponent(body)}`;
+      setSubmitStatus("error");
+      setTimeout(() => setSubmitStatus("idle"), 5000);
+    }
   };
+
+  const buttonLabel =
+    submitStatus === "sending"
+      ? "Sending..."
+      : submitStatus === "sent"
+        ? "Message Sent"
+        : submitStatus === "error"
+          ? "Opened Email App"
+          : "Send Message";
+
+  const ButtonIcon =
+    submitStatus === "sending"
+      ? Loader2
+      : submitStatus === "sent"
+        ? CheckCircle2
+        : submitStatus === "error"
+          ? AlertCircle
+          : Send;
 
   return (
     <section
@@ -193,11 +261,33 @@ export default function Contact() {
 
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-grotesk font-semibold text-sm uppercase tracking-wider py-4 rounded hover:bg-primary/90 transition-colors"
+            disabled={submitStatus === "sending"}
+            className="group relative w-full overflow-hidden rounded bg-primary py-4 font-grotesk text-sm font-semibold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 disabled:cursor-wait disabled:opacity-90"
           >
-            <Send size={16} />
-            {submitted ? "Opening Email..." : "Send Message"}
+            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
+            <span className="absolute inset-0 animate-pulse bg-white/0 group-hover:bg-white/5" />
+            <span className="relative inline-flex items-center justify-center gap-2">
+              <ButtonIcon
+                size={18}
+                className={`transition-transform duration-300 ${
+                  submitStatus === "sending"
+                    ? "animate-spin"
+                    : "group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                }`}
+              />
+              {buttonLabel}
+            </span>
           </button>
+          {submitStatus === "sent" && (
+            <p className="text-center text-sm text-emerald-500">
+              Thanks. Your message was submitted successfully.
+            </p>
+          )}
+          {submitStatus === "error" && (
+            <p className="text-center text-sm text-muted-foreground">
+              Direct sending was blocked, so I opened your email app as a fallback.
+            </p>
+          )}
         </form>
         </div>
 
