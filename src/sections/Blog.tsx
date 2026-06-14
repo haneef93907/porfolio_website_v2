@@ -64,9 +64,6 @@ export default function Blog() {
     >
       <div className="max-w-7xl mx-auto">
         <div className="blog-header text-center mb-12">
-          <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/10 text-primary">
-            Flutter content that attracts clients
-          </Badge>
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">Flutter Blog</h2>
           <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
             Read practical Flutter articles, case stories, Firebase guides,
