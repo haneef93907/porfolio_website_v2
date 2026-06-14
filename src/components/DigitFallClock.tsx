@@ -59,9 +59,9 @@ export default function DigitFallClock() {
         alpha: 0.22 + Math.random() * 0.52,
       }));
 
-      const cardW = Math.min(168, Math.max(126, width * 0.23));
-      const cardH = 76;
-      const phoneW = 180;
+      const cardW = Math.min(160, Math.max(118, width * 0.21));
+      const cardH = 74;
+      const phoneW = 210;
       const cx = width * 0.5;
       const gap = Math.max(30, width * 0.05);
       const leftX = Math.max(18, cx - phoneW / 2 - gap - cardW);
@@ -103,8 +103,8 @@ export default function DigitFallClock() {
 
     function drawPhone(cx: number, cy: number, time: number) {
       const bob = Math.sin(time * 0.0014) * 6;
-      const phoneW = 172;
-      const phoneH = 344;
+      const phoneW = 210;
+      const phoneH = 388;
       const x = cx - phoneW / 2;
       const y = cy - phoneH / 2 + bob;
 
@@ -132,17 +132,17 @@ export default function DigitFallClock() {
 
       context.shadowBlur = 0;
       context.fillStyle = "rgba(255,255,255,0.72)";
-      context.font = '500 10px "Inter", sans-serif';
+      context.font = '500 11px "Inter", sans-serif';
       context.textAlign = "left";
       context.fillText("Hello Haneef", x + 30, y + 68);
 
       context.fillStyle = "rgba(255,255,255,0.94)";
-      context.font = '700 13px "Space Grotesk", sans-serif';
+      context.font = '700 15px "Space Grotesk", sans-serif';
       context.fillText("Let's build something", x + 30, y + 88);
       context.fillText("great today!", x + 30, y + 106);
 
-      roundedRect(context, x + 30, y + 128, phoneW - 60, 58, 14);
-      const metricGradient = context.createLinearGradient(x + 30, y + 128, x + phoneW - 30, y + 186);
+      roundedRect(context, x + 30, y + 128, phoneW - 60, 64, 14);
+      const metricGradient = context.createLinearGradient(x + 30, y + 128, x + phoneW - 30, y + 192);
       metricGradient.addColorStop(0, "rgba(0,191,255,0.38)");
       metricGradient.addColorStop(1, "rgba(24,214,177,0.2)");
       context.fillStyle = metricGradient;
@@ -153,21 +153,21 @@ export default function DigitFallClock() {
       context.fillText("Total Downloads", x + 42, y + 150);
 
       context.fillStyle = "rgba(255,255,255,0.95)";
-      context.font = '700 19px "Space Grotesk", sans-serif';
+      context.font = '700 23px "Space Grotesk", sans-serif';
       context.fillText("40+", x + 42, y + 174);
 
       context.font = '500 12px "JetBrains Mono", monospace';
       context.fillStyle = "rgba(255,140,0,0.95)";
       context.textAlign = "center";
-      context.fillText("ANDROID   IOS", cx, y + 212);
+      context.fillText("ANDROID   IOS", cx, y + 220);
 
       const features = ["Real-time Chat", "Analytics", "Secure Payments", "Push Notifications"];
       context.textAlign = "left";
       for (let i = 0; i < features.length; i++) {
-        const rowY = y + 238 + i * 24;
+        const rowY = y + 248 + i * 25;
         const pulse = 0.45 + Math.sin(time * 0.002 + i) * 0.18;
-        roundedRect(context, x + 30, rowY, phoneW - 60, 17, 9);
-        context.fillStyle = `rgba(255,255,255,${0.075 + pulse * 0.055})`;
+        roundedRect(context, x + 30, rowY, phoneW - 60, 18, 9);
+        context.fillStyle = `rgba(0,0,0,${0.26 + pulse * 0.08})`;
         context.fill();
 
         context.beginPath();
@@ -175,8 +175,8 @@ export default function DigitFallClock() {
         context.fillStyle = i % 2 ? "rgba(0,191,255,0.88)" : "rgba(255,140,0,0.9)";
         context.fill();
 
-        context.fillStyle = "rgba(255,255,255,0.72)";
-        context.font = '600 8.5px "Inter", sans-serif';
+        context.fillStyle = "rgba(255,255,255,0.86)";
+        context.font = '600 9.5px "Inter", sans-serif';
         context.fillText(features[i], x + 52, rowY + 11);
       }
 
@@ -193,7 +193,7 @@ export default function DigitFallClock() {
       const y = card.y + floatY;
       const isLeft = x < cx;
       const startX = isLeft ? x + card.w : x;
-      const endX = isLeft ? cx - 86 : cx + 86;
+      const endX = isLeft ? cx - 105 : cx + 105;
       const cardMidY = y + card.h / 2;
       const phoneY = cy + Math.sin(time * 0.0014) * 6;
       const wave = Math.sin(time * 0.003 + card.phase) * 8;
@@ -249,7 +249,7 @@ export default function DigitFallClock() {
     }
 
     function drawPlatform(cx: number, cy: number, width: number, time: number) {
-      const y = cy + 205;
+      const y = cy + 230;
       context.save();
       context.translate(cx, y);
       for (const [index, ring] of [0.58, 0.4, 0.24].entries()) {

@@ -146,7 +146,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hero-visual hidden lg:block absolute inset-y-0 left-[36%] right-0 opacity-90">
+      <div className="hero-visual hidden lg:block absolute inset-y-0 left-[46%] right-0 opacity-90">
         <DigitFallClock />
       </div>
 
