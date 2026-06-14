@@ -68,9 +68,9 @@ export default function Hero() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-[100dvh] bg-background overflow-hidden flex transition-colors duration-300"
+      className="hero-surface relative min-h-[100dvh] overflow-hidden flex transition-colors duration-300"
     >
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,hsl(var(--background))_0%,hsl(var(--secondary)/0.8)_48%,hsl(var(--background))_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_38%,hsl(var(--primary)/0.16),transparent_24%),radial-gradient(circle_at_84%_66%,hsl(var(--accent)/0.14),transparent_30%)]" />
 
       <div className="relative z-10 w-full lg:w-[56%] flex flex-col justify-center px-6 sm:px-10 lg:px-12 xl:px-16 py-24">
         <div className="max-w-3xl">

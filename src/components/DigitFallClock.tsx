@@ -17,8 +17,6 @@ interface CardNode {
   phase: number;
 }
 
-const BG = "#111214";
-
 export default function DigitFallClock() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<number>(0);
@@ -38,7 +36,6 @@ export default function DigitFallClock() {
     const context = ctx;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-
     function resize() {
       const width = Math.max(containerElement.clientWidth, 320);
       const height = Math.max(containerElement.clientHeight, 320);
@@ -59,11 +56,21 @@ export default function DigitFallClock() {
         alpha: 0.22 + Math.random() * 0.52,
       }));
 
+      const cardW = Math.min(190, Math.max(142, width * 0.26));
+      const cardH = 58;
+      const phoneW = 180;
+      const cx = width * 0.5;
+      const gap = Math.max(36, width * 0.055);
+      const leftX = Math.max(18, cx - phoneW / 2 - gap - cardW);
+      const rightX = Math.min(width - cardW - 18, cx + phoneW / 2 + gap);
+      const topY = Math.max(34, height * 0.18);
+      const bottomY = Math.min(height - cardH - 36, height * 0.72);
+
       cardsRef.current = [
-        { label: "Firebase", x: width * 0.15, y: height * 0.24, w: 128, h: 54, phase: 0.4 },
-        { label: "REST API", x: width * 0.68, y: height * 0.22, w: 122, h: 54, phase: 1.6 },
-        { label: "Stripe", x: width * 0.18, y: height * 0.68, w: 106, h: 52, phase: 2.2 },
-        { label: "Deploy", x: width * 0.66, y: height * 0.68, w: 114, h: 52, phase: 3.1 },
+        { label: "UI/UX Design", x: leftX, y: topY, w: cardW, h: cardH, phase: 0.4 },
+        { label: "Backend Integration", x: rightX, y: topY, w: cardW, h: cardH, phase: 1.6 },
+        { label: "Payment Integration", x: leftX, y: bottomY, w: cardW, h: cardH, phase: 2.2 },
+        { label: "App Deployment", x: rightX, y: bottomY, w: cardW, h: cardH, phase: 3.1 },
       ];
     }
 
@@ -154,12 +161,15 @@ export default function DigitFallClock() {
       context.lineWidth = 1;
       context.stroke();
 
-      context.shadowColor = "rgba(0,191,255,0.22)";
-      context.shadowBlur = 18;
+      context.shadowColor = "rgba(255,140,0,0.24)";
+      context.shadowBlur = 20;
       roundedRect(context, x, y, card.w, card.h, 12);
-      context.fillStyle = "rgba(255,255,255,0.075)";
+      const cardGradient = context.createLinearGradient(x, y, x + card.w, y + card.h);
+      cardGradient.addColorStop(0, "rgba(255,255,255,0.16)");
+      cardGradient.addColorStop(1, "rgba(255,255,255,0.07)");
+      context.fillStyle = cardGradient;
       context.fill();
-      context.strokeStyle = "rgba(255,255,255,0.16)";
+      context.strokeStyle = "rgba(255,255,255,0.2)";
       context.stroke();
       context.shadowBlur = 0;
 
@@ -177,13 +187,11 @@ export default function DigitFallClock() {
       const cy = height * 0.52;
 
       context.clearRect(0, 0, width, height);
-      context.fillStyle = BG;
-      context.fillRect(0, 0, width, height);
 
       const bgGradient = context.createRadialGradient(cx, cy, 0, cx, cy, Math.max(width, height) * 0.7);
-      bgGradient.addColorStop(0, "rgba(255,140,0,0.15)");
-      bgGradient.addColorStop(0.34, "rgba(0,191,255,0.08)");
-      bgGradient.addColorStop(1, "rgba(17,18,20,0)");
+      bgGradient.addColorStop(0, "rgba(255,140,0,0.17)");
+      bgGradient.addColorStop(0.34, "rgba(0,191,255,0.11)");
+      bgGradient.addColorStop(1, "rgba(0,0,0,0)");
       context.fillStyle = bgGradient;
       context.fillRect(0, 0, width, height);
 
