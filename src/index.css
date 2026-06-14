@@ -279,6 +279,7 @@
   }
 
   .hero-visual {
+    pointer-events: none;
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 100%);
     mask-image: linear-gradient(to right, transparent 0%, black 8%, black 100%);
   }
