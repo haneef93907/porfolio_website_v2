@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { ArrowLeft } from "lucide-react";
-import { getBlogBySlug } from "../data/blogs";
+import { defaultBlogs, getBlogBySlug, type BlogPost } from "../data/blogs";
+import { loadContent } from "../lib/contentApi";
 import Navigation from "../sections/Navigation";
 import Footer from "../sections/Footer";
 import SEO from "../components/SEO";
@@ -53,7 +55,31 @@ function renderMarkdown(content: string) {
 
 export default function BlogDetail() {
   const { slug = "" } = useParams();
-  const blog = getBlogBySlug(slug);
+  const [blog, setBlog] = useState<BlogPost | undefined>(() => getBlogBySlug(slug));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    void loadContent<BlogPost[]>("blogs", defaultBlogs).then((result) => {
+      if (!active) return;
+      setBlog(result.data.find((item) => item.published && (item.slug === slug || item.id === slug)));
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  if (!blog && loading) {
+    return (
+      <>
+        <Navigation />
+        <main className="min-h-screen bg-background px-6 py-32 text-center">
+          <p className="text-muted-foreground">Loading article...</p>
+        </main>
+      </>
+    );
+  }
 
   if (!blog) {
     return (

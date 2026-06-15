@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import {
   addBlog,
@@ -17,6 +17,7 @@ import {
   updateProject,
   type Project,
 } from "../data/projects";
+import { loadContent, saveContent, uploadImage, type AdminWriteCredentials } from "../lib/contentApi";
 import { safeRemoveStorage } from "../lib/safeStorage";
 import {
   exportCsv,
@@ -149,13 +150,31 @@ function splitComma(value: string) {
   return value.split(",").map((item) => item.trim()).filter(Boolean);
 }
 
-function imageUpload(setValue: (value: string) => void) {
+function imageUpload(
+  setValue: (value: string) => void,
+  getCredentials: () => AdminWriteCredentials,
+  setStatus: (value: string) => void,
+  folder: "projects" | "blogs"
+) {
   return (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setValue(String(reader.result));
+    reader.onload = () => {
+      const dataUrl = String(reader.result);
+      setValue(dataUrl);
+      setStatus("Uploading image to Supabase Storage...");
+      void uploadImage(file.name, dataUrl, folder, getCredentials()).then((result) => {
+        setValue(result.url);
+        setStatus(
+          result.source === "backend"
+            ? "Image uploaded to Supabase Storage. Save the item to publish this URL."
+            : `Image is only local right now. Upload failed: ${result.error || "Supabase Storage is not configured."}`
+        );
+      });
+    };
     reader.readAsDataURL(file);
+    event.target.value = "";
   };
 }
 
@@ -169,6 +188,7 @@ export default function Admin() {
   const [projects, setProjects] = useState<Project[]>(() => getProjects());
   const [blogs, setBlogs] = useState<BlogPost[]>(() => getBlogs());
   const [leads, setLeads] = useState<ContactLead[]>(() => getContactLeads());
+  const [backendStatus, setBackendStatus] = useState("Checking content backend...");
   const [analyticsVersion, setAnalyticsVersion] = useState(0);
   const [projectForm, setProjectForm] = useState<ProjectForm | null>(null);
   const [blogForm, setBlogForm] = useState<BlogForm | null>(null);
@@ -194,10 +214,82 @@ export default function Admin() {
     setAuthError("");
     if (await verifyAdminCredentials(email, password)) {
       createAdminSession();
+      sessionStorage.setItem("portfolio-admin-email", email);
+      sessionStorage.setItem("portfolio-admin-password", password);
       setLoggedIn(true);
     } else {
       setAuthError("Incorrect email or password. Check your Vercel environment variables and try again.");
     }
+  };
+
+  const credentials = (): AdminWriteCredentials => ({
+    email: sessionStorage.getItem("portfolio-admin-email") || email,
+    password: sessionStorage.getItem("portfolio-admin-password") || password,
+  });
+
+  useEffect(() => {
+    if (!loggedIn) return;
+    let active = true;
+
+    const adminCredentials: AdminWriteCredentials = {
+      email: sessionStorage.getItem("portfolio-admin-email") || email,
+      password: sessionStorage.getItem("portfolio-admin-password") || password,
+    };
+
+    void Promise.all([
+      loadContent<Project[]>("projects", getProjects()),
+      loadContent<BlogPost[]>("blogs", getBlogs()),
+    ]).then(async ([projectResult, blogResult]) => {
+      if (!active) return;
+      setProjects(projectResult.data);
+      setBlogs(blogResult.data);
+      const backendOk = projectResult.source === "backend" && blogResult.source === "backend";
+      if (!backendOk) {
+        const [seededProjects, seededBlogs] = await Promise.all([
+          projectResult.source === "backend"
+            ? Promise.resolve(projectResult)
+            : saveContent("projects", projectResult.data, adminCredentials),
+          blogResult.source === "backend"
+            ? Promise.resolve(blogResult)
+            : saveContent("blogs", blogResult.data, adminCredentials),
+        ]);
+        if (!active) return;
+        const seededOk = seededProjects.source === "backend" && seededBlogs.source === "backend";
+        setBackendStatus(
+          seededOk
+            ? "Connected to backend. Existing content has been seeded to Supabase."
+            : `Local fallback only. Configure Supabase env vars/table/bucket on Vercel. ${seededProjects.error || seededBlogs.error || ""}`
+        );
+        return;
+      }
+      setBackendStatus(
+        "Connected to backend. Changes will be visible to everyone."
+      );
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [loggedIn, email, password]);
+
+  const persistProjects = async (nextProjects: Project[]) => {
+    setProjects(nextProjects);
+    const result = await saveContent("projects", nextProjects, credentials());
+    setBackendStatus(
+      result.source === "backend"
+        ? "Saved to backend. Changes are public and persistent."
+        : `Saved only in this browser. Backend save failed: ${result.error || "Not configured."}`
+    );
+  };
+
+  const persistBlogs = async (nextBlogs: BlogPost[]) => {
+    setBlogs(nextBlogs);
+    const result = await saveContent("blogs", nextBlogs, credentials());
+    setBackendStatus(
+      result.source === "backend"
+        ? "Saved to backend. Changes are public and persistent."
+        : `Saved only in this browser. Backend save failed: ${result.error || "Not configured."}`
+    );
   };
 
   const saveProjectForm = () => {
@@ -231,7 +323,7 @@ export default function Admin() {
       published: projectForm.published,
     };
 
-    setProjects(projectForm.id ? updateProject(projectForm.id, payload) : addProject(payload));
+    void persistProjects(projectForm.id ? updateProject(projectForm.id, payload) : addProject(payload));
     setProjectForm(null);
   };
 
@@ -252,7 +344,7 @@ export default function Admin() {
       published: blogForm.published,
     };
 
-    setBlogs(blogForm.id ? updateBlog(blogForm.id, payload) : addBlog(payload));
+    void persistBlogs(blogForm.id ? updateBlog(blogForm.id, payload) : addBlog(payload));
     setBlogForm(null);
   };
 
@@ -329,6 +421,8 @@ export default function Admin() {
           <button
             onClick={() => {
               safeRemoveStorage("session", "portfolio-admin");
+              sessionStorage.removeItem("portfolio-admin-email");
+              sessionStorage.removeItem("portfolio-admin-password");
               clearAdminSession();
               setLoggedIn(false);
             }}
@@ -341,6 +435,9 @@ export default function Admin() {
       </header>
 
       <div className="mx-auto max-w-[1200px] px-6 py-8">
+        <div className="mb-5 rounded border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+          {backendStatus}
+        </div>
         <div className="mb-6 flex flex-wrap gap-3">
           {(["overview", "analytics", "leads", "projects", "blogs", "reports", "security"] as Tab[]).map((item) => (
             <button
@@ -392,7 +489,7 @@ export default function Admin() {
             <AdminToolbar
               title="Projects"
               onAdd={() => setProjectForm(emptyProject)}
-              onReset={() => window.confirm("Reset projects?") && setProjects(resetProjects())}
+              onReset={() => window.confirm("Reset projects?") && void persistProjects(resetProjects())}
             />
             {projectForm && (
               <ProjectEditor
@@ -400,6 +497,8 @@ export default function Admin() {
                 setForm={setProjectForm}
                 onSave={saveProjectForm}
                 onCancel={() => setProjectForm(null)}
+                getCredentials={credentials}
+                setStatus={setBackendStatus}
               />
             )}
             <div className="grid gap-4">
@@ -438,8 +537,8 @@ export default function Admin() {
                       published: project.published,
                     })
                   }
-                  onToggle={() => setProjects(updateProject(project.id, { published: !project.published }))}
-                  onDelete={() => window.confirm("Delete project?") && setProjects(deleteProject(project.id))}
+                  onToggle={() => void persistProjects(updateProject(project.id, { published: !project.published }))}
+                  onDelete={() => window.confirm("Delete project?") && void persistProjects(deleteProject(project.id))}
                   toggleLabel={project.published ? "Unpublish" : "Publish"}
                 />
               ))}
@@ -452,7 +551,7 @@ export default function Admin() {
             <AdminToolbar
               title="Blogs"
               onAdd={() => setBlogForm(emptyBlog)}
-              onReset={() => window.confirm("Reset blogs?") && setBlogs(resetBlogs())}
+              onReset={() => window.confirm("Reset blogs?") && void persistBlogs(resetBlogs())}
             />
             {blogForm && (
               <BlogEditor
@@ -460,6 +559,8 @@ export default function Admin() {
                 setForm={setBlogForm}
                 onSave={saveBlogForm}
                 onCancel={() => setBlogForm(null)}
+                getCredentials={credentials}
+                setStatus={setBackendStatus}
               />
             )}
             <div className="grid gap-4">
@@ -487,8 +588,8 @@ export default function Admin() {
                       published: blog.published,
                     })
                   }
-                  onToggle={() => setBlogs(updateBlog(blog.id, { published: !blog.published }))}
-                  onDelete={() => window.confirm("Delete blog?") && setBlogs(deleteBlog(blog.id))}
+                  onToggle={() => void persistBlogs(updateBlog(blog.id, { published: !blog.published }))}
+                  onDelete={() => window.confirm("Delete blog?") && void persistBlogs(deleteBlog(blog.id))}
                   toggleLabel={blog.published ? "Unpublish" : "Publish"}
                 />
               ))}
@@ -792,11 +893,13 @@ function Field(props: {
   );
 }
 
-function ProjectEditor({ form, setForm, onSave, onCancel }: {
+function ProjectEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus }: {
   form: ProjectForm;
   setForm: (form: ProjectForm) => void;
   onSave: () => void;
   onCancel: () => void;
+  getCredentials: () => AdminWriteCredentials;
+  setStatus: (value: string) => void;
 }) {
   return (
     <div className="mb-8 rounded border border-border bg-card p-5">
@@ -812,7 +915,12 @@ function ProjectEditor({ form, setForm, onSave, onCancel }: {
         <label className="flex cursor-pointer items-center gap-2 rounded border border-border bg-background px-3 py-2 text-sm text-muted-foreground hover:text-primary">
           <ImagePlus size={16} />
           Upload project image
-          <input type="file" accept="image/*" className="hidden" onChange={imageUpload((image) => setForm({ ...form, image }))} />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={imageUpload((image) => setForm({ ...form, image }), getCredentials, setStatus, "projects")}
+          />
         </label>
         <Field label="Description" value={form.description} onChange={(description) => setForm({ ...form, description })} textarea />
         <Field label="Overview" value={form.overview} onChange={(overview) => setForm({ ...form, overview })} textarea />
@@ -835,11 +943,13 @@ function ProjectEditor({ form, setForm, onSave, onCancel }: {
   );
 }
 
-function BlogEditor({ form, setForm, onSave, onCancel }: {
+function BlogEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus }: {
   form: BlogForm;
   setForm: (form: BlogForm) => void;
   onSave: () => void;
   onCancel: () => void;
+  getCredentials: () => AdminWriteCredentials;
+  setStatus: (value: string) => void;
 }) {
   return (
     <div className="mb-8 rounded border border-border bg-card p-5">
@@ -855,7 +965,12 @@ function BlogEditor({ form, setForm, onSave, onCancel }: {
         <label className="flex cursor-pointer items-center gap-2 rounded border border-border bg-background px-3 py-2 text-sm text-muted-foreground hover:text-primary">
           <ImagePlus size={16} />
           Upload cover image
-          <input type="file" accept="image/*" className="hidden" onChange={imageUpload((image) => setForm({ ...form, image }))} />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={imageUpload((image) => setForm({ ...form, image }), getCredentials, setStatus, "blogs")}
+          />
         </label>
         <Field label="Excerpt" value={form.excerpt} onChange={(excerpt) => setForm({ ...form, excerpt })} textarea />
         <Field label="SEO Title" value={form.seoTitle} onChange={(seoTitle) => setForm({ ...form, seoTitle })} />

@@ -1,6 +1,7 @@
-import { memo, useMemo } from "react";
+import { memo, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { getPublishedProjects, type Project } from "../data/projects";
+import { defaultProjects, getPublishedProjects, type Project } from "../data/projects";
+import { loadContent } from "../lib/contentApi";
 import { safeArray } from "../lib/utils";
 import { ArrowRight, ExternalLink, Store } from "lucide-react";
 
@@ -113,7 +114,18 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
 });
 
 export default function Projects() {
-  const projects = useMemo<Project[]>(() => getPublishedProjects(), []);
+  const [projects, setProjects] = useState<Project[]>(() => getPublishedProjects());
+
+  useEffect(() => {
+    let active = true;
+    void loadContent<Project[]>("projects", defaultProjects).then((result) => {
+      if (!active) return;
+      setProjects(result.data.filter((project) => project.published));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <section

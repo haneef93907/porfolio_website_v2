@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { getProjectBySlug } from "../data/projects";
+import { defaultProjects, getProjectBySlug, type Project } from "../data/projects";
+import { loadContent } from "../lib/contentApi";
 import Navigation from "../sections/Navigation";
 import Footer from "../sections/Footer";
 import Contact from "../sections/Contact";
@@ -10,7 +12,31 @@ import { SITE_URL } from "../config/site";
 
 export default function ProjectDetail() {
   const { slug = "" } = useParams();
-  const project = getProjectBySlug(slug);
+  const [project, setProject] = useState<Project | undefined>(() => getProjectBySlug(slug));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    void loadContent<Project[]>("projects", defaultProjects).then((result) => {
+      if (!active) return;
+      setProject(result.data.find((item) => item.published && (item.slug === slug || item.id === slug)));
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  if (!project && loading) {
+    return (
+      <>
+        <Navigation />
+        <main className="min-h-screen bg-background px-6 py-32 text-center">
+          <p className="text-muted-foreground">Loading project...</p>
+        </main>
+      </>
+    );
+  }
 
   if (!project) {
     return (

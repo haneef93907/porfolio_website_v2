@@ -30,7 +30,7 @@ export interface Project {
   link?: string;
 }
 
-const defaultProjects: Project[] = [
+export const defaultProjects: Project[] = [
   {
     id: "gemini-cms",
     slug: "gemini-cloud-cms",

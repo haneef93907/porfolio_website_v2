@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router';
-import { getPublishedBlogs } from '../data/blogs';
+import { defaultBlogs, getPublishedBlogs, type BlogPost } from '../data/blogs';
+import { loadContent } from '../lib/contentApi';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import SEO from '../components/SEO';
@@ -14,7 +15,22 @@ export default function Blog() {
   const location = useLocation();
   const standalone = location.pathname === '/blog';
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const blogs = getPublishedBlogs();
+  const [blogs, setBlogs] = useState<BlogPost[]>(() => getPublishedBlogs());
+
+  useEffect(() => {
+    let active = true;
+    void loadContent<BlogPost[]>('blogs', defaultBlogs).then((result) => {
+      if (!active) return;
+      setBlogs(
+        result.data
+          .filter((blog) => blog.published)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      );
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const categories = ['All', 'Client Growth', 'SEO', 'Performance', 'Architecture', 'UI/UX', 'Backend', 'Deployment'];
 
