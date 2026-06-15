@@ -42,6 +42,7 @@ export default function Hero() {
           <div className="hero-button flex flex-col sm:flex-row gap-3 mb-5">
             <button
               onClick={handleScrollToContact}
+              data-track="Hero hire me"
               className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-grotesk font-semibold text-sm uppercase tracking-wider px-6 py-3.5 rounded hover:bg-primary/90 transition-colors hover-lift"
             >
               <Send size={16} />
@@ -49,6 +50,7 @@ export default function Hero() {
             </button>
             <button
               onClick={handleScrollToWork}
+              data-track="Hero view projects"
               className="inline-flex items-center justify-center gap-2 border border-border bg-card/80 text-foreground font-grotesk font-semibold text-sm uppercase tracking-wider px-6 py-3.5 rounded hover:border-primary/50 hover:text-primary transition-colors"
             >
               <ArrowDown size={16} />
@@ -59,6 +61,7 @@ export default function Hero() {
           <div className="hero-button mb-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-muted-foreground">
             <a
               href="/Muhammad-Haneef-CV.pdf"
+              data-track="Hero resume download"
               className="inline-flex items-center gap-2 transition-colors hover:text-primary"
             >
               <Download size={15} />
@@ -66,6 +69,7 @@ export default function Hero() {
             </a>
             <a
               href="https://wa.me/923030038699"
+              data-track="Hero WhatsApp"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-emerald-500 transition-colors hover:text-emerald-400"

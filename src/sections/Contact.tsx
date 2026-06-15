@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import { addContactLead } from "../lib/analytics";
 
 type SubmitStatus = "idle" | "sending" | "sent" | "error";
 
@@ -38,6 +39,16 @@ export default function Contact() {
     };
 
     setSubmitStatus("sending");
+    addContactLead({
+      name,
+      email,
+      projectType,
+      budget,
+      message,
+      sourcePage: window.location.pathname,
+      sourceSection: "contact",
+      utmSource: new URLSearchParams(window.location.search).get("utm_source") || new URLSearchParams(window.location.search).get("source") || "Direct",
+    });
 
     try {
       const response = await fetch("https://formsubmit.co/ajax/haneef93907@gmail.com", {
@@ -120,6 +131,7 @@ export default function Contact() {
             <div className="mt-6 space-y-4">
               <a
                 href="mailto:haneef93907@gmail.com"
+                data-track="Email link"
                 className="flex items-center gap-3 text-muted-foreground hover:text-primary"
               >
                 <Mail size={18} />
@@ -127,6 +139,7 @@ export default function Contact() {
               </a>
               <a
                 href="tel:+923030038699"
+                data-track="Phone link"
                 className="flex items-center gap-3 text-muted-foreground hover:text-primary"
               >
                 <Phone size={18} />
@@ -134,6 +147,7 @@ export default function Contact() {
               </a>
               <a
                 href="https://wa.me/923030038699"
+                data-track="WhatsApp direct link"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-emerald-500 hover:text-emerald-400"
@@ -143,6 +157,7 @@ export default function Contact() {
               </a>
               <a
                 href="https://www.linkedin.com/in/muhammad-haneef-flutterdev/"
+                data-track="LinkedIn direct link"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-muted-foreground hover:text-primary"
@@ -233,6 +248,7 @@ export default function Contact() {
 
           <button
             type="submit"
+            data-track="Contact form submit"
             disabled={submitStatus === "sending"}
             className="group relative w-full overflow-hidden rounded bg-primary py-4 font-grotesk text-sm font-semibold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 disabled:cursor-wait disabled:opacity-90"
           >
@@ -267,6 +283,7 @@ export default function Contact() {
         <div className="contact-animate flex items-center justify-center gap-6 mt-12">
           <a
             href="https://www.linkedin.com/in/muhammad-haneef-flutterdev/"
+            data-track="LinkedIn footer contact"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
@@ -276,6 +293,7 @@ export default function Contact() {
           </a>
           <a
             href="https://github.com"
+            data-track="GitHub footer contact"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
@@ -285,6 +303,7 @@ export default function Contact() {
           </a>
           <a
             href="tel:+923030038699"
+            data-track="Phone footer contact"
             className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Phone"
           >

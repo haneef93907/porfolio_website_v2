@@ -17,23 +17,44 @@ import {
   updateProject,
   type Project,
 } from "../data/projects";
-import { safeGetStorage, safeRemoveStorage, safeSetStorage } from "../lib/safeStorage";
+import { safeRemoveStorage } from "../lib/safeStorage";
+import {
+  exportCsv,
+  getAnalyticsEvents,
+  getContactLeads,
+  summarizeAnalytics,
+  updateContactLead,
+  type ContactLead,
+} from "../lib/analytics";
+import {
+  clearAdminSession,
+  createAdminSession,
+  hasProductionAuthConfig,
+  isAdminAuthenticated,
+  verifyAdminCredentials,
+} from "../lib/adminAuth";
 import {
   ArrowLeft,
   BarChart3,
+  Download,
   Eye,
   ImagePlus,
   Lock,
+  LogOut,
+  MousePointerClick,
   Pencil,
   Plus,
   RotateCcw,
   Save,
   Shield,
+  Smartphone,
   Trash2,
+  Users,
   X,
+  type LucideIcon,
 } from "lucide-react";
 
-type Tab = "overview" | "projects" | "blogs";
+type Tab = "overview" | "analytics" | "leads" | "projects" | "blogs" | "reports" | "security";
 
 interface ProjectForm {
   id?: string;
@@ -138,13 +159,20 @@ function imageUpload(setValue: (value: string) => void) {
 }
 
 export default function Admin() {
-  const [loggedIn, setLoggedIn] = useState(() => safeGetStorage("session", "portfolio-admin") === "true");
+  const [loggedIn, setLoggedIn] = useState(() => isAdminAuthenticated());
+  const [email, setEmail] = useState(import.meta.env.VITE_ADMIN_EMAIL || "admin@portfolio.local");
   const [password, setPassword] = useState("");
-  const [tab, setTab] = useState<Tab>("blogs");
+  const [tab, setTab] = useState<Tab>("overview");
   const [projects, setProjects] = useState<Project[]>(() => getProjects());
   const [blogs, setBlogs] = useState<BlogPost[]>(() => getBlogs());
+  const [leads, setLeads] = useState<ContactLead[]>(() => getContactLeads());
+  const [analyticsVersion, setAnalyticsVersion] = useState(0);
   const [projectForm, setProjectForm] = useState<ProjectForm | null>(null);
   const [blogForm, setBlogForm] = useState<BlogForm | null>(null);
+  const analytics = useMemo(() => {
+    void analyticsVersion;
+    return summarizeAnalytics();
+  }, [analyticsVersion]);
 
   const stats = useMemo(
     () => [
@@ -152,15 +180,16 @@ export default function Admin() {
       ["Published Projects", projects.filter((item) => item.published).length],
       ["Blogs", blogs.length],
       ["Published Blogs", blogs.filter((item) => item.published).length],
+      ["Visitors", analytics.uniqueVisitors],
+      ["Contact Leads", leads.length],
     ],
-    [blogs, projects]
+    [analytics.uniqueVisitors, blogs, leads.length, projects]
   );
 
-  const login = (event: React.FormEvent) => {
+  const login = async (event: React.FormEvent) => {
     event.preventDefault();
-    const expected = import.meta.env.VITE_ADMIN_PASSWORD || "admin123";
-    if (password === expected) {
-      safeSetStorage("session", "portfolio-admin", "true");
+    if (await verifyAdminCredentials(email, password)) {
+      createAdminSession();
       setLoggedIn(true);
     } else {
       alert("Incorrect password");
@@ -231,9 +260,21 @@ export default function Admin() {
             <Lock className="text-primary" />
             <div>
               <h1 className="font-grotesk text-2xl font-bold">Admin Login</h1>
-              <p className="text-sm text-muted-foreground">Default password: admin123</p>
+              <p className="text-sm text-muted-foreground">Protected portfolio dashboard</p>
             </div>
           </div>
+          {!hasProductionAuthConfig() && (
+            <div className="mb-4 rounded border border-primary/30 bg-primary/10 p-3 text-xs text-muted-foreground">
+              Development login is active. Set VITE_ADMIN_EMAIL and VITE_ADMIN_PASSWORD_HASH for deployment.
+            </div>
+          )}
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="mb-3 w-full rounded border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-primary"
+            placeholder="Admin email"
+          />
           <input
             type="password"
             value={password}
@@ -263,10 +304,12 @@ export default function Admin() {
           <button
             onClick={() => {
               safeRemoveStorage("session", "portfolio-admin");
+              clearAdminSession();
               setLoggedIn(false);
             }}
-            className="rounded border border-border px-3 py-2 text-xs uppercase tracking-wider text-muted-foreground hover:text-primary"
+            className="inline-flex items-center gap-2 rounded border border-border px-3 py-2 text-xs uppercase tracking-wider text-muted-foreground hover:text-primary"
           >
+            <LogOut size={14} />
             Logout
           </button>
         </div>
@@ -274,7 +317,7 @@ export default function Admin() {
 
       <div className="mx-auto max-w-[1200px] px-6 py-8">
         <div className="mb-6 flex flex-wrap gap-3">
-          {(["overview", "projects", "blogs"] as Tab[]).map((item) => (
+          {(["overview", "analytics", "leads", "projects", "blogs", "reports", "security"] as Tab[]).map((item) => (
             <button
               key={item}
               onClick={() => setTab(item)}
@@ -289,27 +332,34 @@ export default function Admin() {
 
         {tab === "overview" && (
           <section>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {stats.map(([label, value]) => (
-                <div key={label} className="rounded border border-border bg-card p-5">
-                  <BarChart3 className="mb-4 text-primary" />
-                  <p className="text-3xl font-bold">{value}</p>
-                  <p className="text-sm text-muted-foreground">{label}</p>
-                </div>
+                <StatCard key={label} label={String(label)} value={String(value)} icon={BarChart3} />
               ))}
             </div>
             <div className="mt-8 rounded border border-border bg-card p-6">
-              <h2 className="font-grotesk text-2xl font-bold">Backend notes</h2>
+              <h2 className="font-grotesk text-2xl font-bold">Admin backend notes</h2>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                This dashboard currently stores content in browser localStorage.
-                The forms include Firestore/Supabase-ready fields: title, slug,
-                images, category, links, SEO title, SEO description, published
-                state, and featured state. For production, connect these helpers
-                to Firebase Auth, Firestore, and Storage or Supabase Auth,
-                Database, and Storage.
+                This SPA now lazy-loads the admin portal, protects access with an
+                expiring admin session, tracks anonymous visitor activity, and
+                stores content/leads locally. For true production security,
+                connect the same shapes to Firebase Auth + Firestore security
+                rules or Supabase Auth + RLS; frontend-only credentials cannot
+                protect writes from a determined public user.
               </p>
             </div>
           </section>
+        )}
+
+        {tab === "analytics" && (
+          <AnalyticsPanel analytics={analytics} onRefresh={() => setAnalyticsVersion((value) => value + 1)} />
+        )}
+
+        {tab === "leads" && (
+          <LeadsPanel
+            leads={leads}
+            onChange={(id, updates) => setLeads(updateContactLead(id, updates))}
+          />
         )}
 
         {tab === "projects" && (
@@ -420,6 +470,10 @@ export default function Admin() {
             </div>
           </section>
         )}
+
+        {tab === "reports" && <ReportsPanel leads={leads} />}
+
+        {tab === "security" && <SecurityPanel />}
       </div>
     </main>
   );
@@ -440,6 +494,212 @@ function AdminToolbar({ title, onAdd, onReset }: { title: string; onAdd: () => v
         </button>
       </div>
     </div>
+  );
+}
+
+function StatCard({ label, value, icon: Icon }: { label: string; value: string; icon: LucideIcon }) {
+  return (
+    <div className="rounded border border-border bg-card p-5">
+      <Icon className="mb-4 text-primary" />
+      <p className="text-3xl font-bold">{value}</p>
+      <p className="text-sm text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function AnalyticsPanel({
+  analytics,
+  onRefresh,
+}: {
+  analytics: ReturnType<typeof summarizeAnalytics>;
+  onRefresh: () => void;
+}) {
+  return (
+    <section className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-grotesk text-2xl font-bold">Analytics Overview</h2>
+        <button onClick={onRefresh} className="rounded border border-border px-4 py-2 text-sm">
+          Refresh
+        </button>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Total events" value={String(analytics.totalEvents)} icon={BarChart3} />
+        <StatCard label="Unique visitors" value={String(analytics.uniqueVisitors)} icon={Users} />
+        <StatCard label="Today" value={String(analytics.todayVisitors)} icon={Users} />
+        <StatCard label="Avg seconds" value={String(analytics.avgDuration)} icon={MousePointerClick} />
+        <StatCard label="7 day visitors" value={String(analytics.weekVisitors)} icon={Users} />
+        <StatCard label="30 day visitors" value={String(analytics.monthVisitors)} icon={Users} />
+        <StatCard label="Bounces" value={String(analytics.bounceSessions)} icon={MousePointerClick} />
+        <StatCard label="Device types" value={String(Object.keys(analytics.devices).length)} icon={Smartphone} />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Breakdown title="Most viewed sections" data={analytics.sectionViews} />
+        <Breakdown title="Most clicked actions" data={analytics.clicks} />
+        <Breakdown title="Traffic sources" data={analytics.sources} />
+        <Breakdown title="Devices" data={analytics.devices} />
+        <Breakdown title="Browsers" data={analytics.browsers} />
+        <Breakdown title="Campaigns" data={analytics.campaigns} />
+      </div>
+    </section>
+  );
+}
+
+function Breakdown({ title, data }: { title: string; data: Record<string, number> }) {
+  const rows = Object.entries(data).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  return (
+    <div className="rounded border border-border bg-card p-5">
+      <h3 className="font-grotesk text-lg font-semibold">{title}</h3>
+      <div className="mt-4 space-y-3">
+        {rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No data yet.</p>
+        ) : (
+          rows.map(([label, value]) => (
+            <div key={label} className="flex items-center justify-between gap-4 text-sm">
+              <span className="truncate text-muted-foreground">{label}</span>
+              <span className="rounded bg-secondary px-2 py-1 font-mono text-xs">{value}</span>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LeadsPanel({
+  leads,
+  onChange,
+}: {
+  leads: ContactLead[];
+  onChange: (id: string, updates: Partial<ContactLead>) => void;
+}) {
+  return (
+    <section>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-grotesk text-2xl font-bold">Contact Leads</h2>
+        <button
+          onClick={() => exportCsv("contact-leads.csv", leads as unknown as Array<Record<string, unknown>>)}
+          className="inline-flex items-center gap-2 rounded border border-border px-4 py-2 text-sm"
+        >
+          <Download size={15} />
+          Export CSV
+        </button>
+      </div>
+      <div className="overflow-hidden rounded border border-border bg-card">
+        {leads.length === 0 ? (
+          <div className="p-8 text-center text-sm text-muted-foreground">No leads captured yet.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] text-left text-sm">
+              <thead className="border-b border-border bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="p-3">Lead</th>
+                  <th className="p-3">Project</th>
+                  <th className="p-3">Source</th>
+                  <th className="p-3">Likely type</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leads.map((lead) => (
+                  <tr key={lead.id} className="border-b border-border/70 align-top">
+                    <td className="p-3">
+                      <p className="font-semibold">{lead.name}</p>
+                      <p className="text-muted-foreground">{lead.email}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(lead.createdAt).toLocaleString()}</p>
+                    </td>
+                    <td className="p-3">
+                      <p>{lead.projectType}</p>
+                      <p className="text-muted-foreground">{lead.budget}</p>
+                    </td>
+                    <td className="p-3">{lead.utmSource || lead.sourcePage}</td>
+                    <td className="p-3">{lead.likelyVisitor}</td>
+                    <td className="p-3">
+                      <select
+                        value={lead.status}
+                        onChange={(event) => onChange(lead.id, { status: event.target.value as ContactLead["status"] })}
+                        className="rounded border border-border bg-background px-2 py-1"
+                      >
+                        <option>New</option>
+                        <option>Contacted</option>
+                        <option>Converted</option>
+                        <option>Rejected</option>
+                      </select>
+                    </td>
+                    <td className="p-3">
+                      <textarea
+                        value={lead.notes}
+                        onChange={(event) => onChange(lead.id, { notes: event.target.value })}
+                        className="min-h-16 w-full rounded border border-border bg-background px-2 py-1"
+                        placeholder="Add notes"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function ReportsPanel({ leads }: { leads: ContactLead[] }) {
+  const events = getAnalyticsEvents();
+  return (
+    <section className="space-y-5">
+      <h2 className="font-grotesk text-2xl font-bold">Reports</h2>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ReportExport title="Visitor events" count={events.length} onExport={() => exportCsv("analytics-events.csv", events as unknown as Array<Record<string, unknown>>)} />
+        <ReportExport title="Contact submissions" count={leads.length} onExport={() => exportCsv("contact-leads.csv", leads as unknown as Array<Record<string, unknown>>)} />
+        <ReportExport title="Click report" count={events.filter((event) => event.type.includes("click")).length} onExport={() => exportCsv("click-events.csv", events.filter((event) => event.type.includes("click")) as unknown as Array<Record<string, unknown>>)} />
+      </div>
+    </section>
+  );
+}
+
+function ReportExport({ title, count, onExport }: { title: string; count: number; onExport: () => void }) {
+  return (
+    <div className="rounded border border-border bg-card p-5">
+      <p className="text-2xl font-bold">{count}</p>
+      <p className="text-sm text-muted-foreground">{title}</p>
+      <button onClick={onExport} disabled={count === 0} className="mt-4 inline-flex items-center gap-2 rounded border border-border px-3 py-2 text-sm disabled:opacity-50">
+        <Download size={15} />
+        Export CSV
+      </button>
+    </div>
+  );
+}
+
+function SecurityPanel() {
+  return (
+    <section className="space-y-5">
+      <h2 className="font-grotesk text-2xl font-bold">Security</h2>
+      <div className="rounded border border-border bg-card p-6 text-sm leading-relaxed text-muted-foreground">
+        <p className="font-semibold text-foreground">Current mode: SPA-local admin</p>
+        <p className="mt-3">
+          Admin access uses an expiring session and environment-configured credentials. This protects casual access,
+          but frontend-only authentication cannot be considered production-secure because bundled JavaScript is public.
+        </p>
+        <p className="mt-3">
+          Production recommendation: Firebase Auth + Firestore + Storage with rules checking an admin UID, or Supabase
+          Auth + Postgres RLS + Storage policies. Store content, analytics, leads, and media there, not in localStorage.
+        </p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        {[
+          "Hidden access is only convenience; /admin still requires login.",
+          "Admin route is lazy-loaded outside the public bundle path.",
+          "Anonymous analytics avoids exact identity claims.",
+          "Leads are classified as likely recruiter/client/unknown only.",
+        ].map((item) => (
+          <div key={item} className="rounded border border-border bg-card p-4 text-sm text-muted-foreground">
+            {item}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

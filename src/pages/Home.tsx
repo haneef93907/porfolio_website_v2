@@ -10,8 +10,11 @@ import Contact from "../sections/Contact";
 import Footer from "../sections/Footer";
 import SEO from "../components/SEO";
 import { SITE_URL } from "../config/site";
+import { usePortfolioAnalytics } from "../hooks/usePortfolioAnalytics";
 
 export default function Home() {
+  usePortfolioAnalytics();
+
   return (
     <>
       <SEO
