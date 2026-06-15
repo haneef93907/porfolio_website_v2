@@ -4,6 +4,7 @@ const EVENTS_KEY = "portfolio-analytics-events-v1";
 const VISITOR_KEY = "portfolio-visitor-id";
 const SESSION_KEY = "portfolio-session";
 const LEADS_KEY = "portfolio-contact-leads-v1";
+const GEO_KEY = "portfolio-session-geo";
 
 export type AnalyticsEventType =
   | "page_load"
@@ -31,6 +32,8 @@ export interface AnalyticsEvent {
   os: string;
   country?: string;
   city?: string;
+  region?: string;
+  timezone?: string;
   meta?: Record<string, string | number | boolean | undefined>;
 }
 
@@ -59,6 +62,13 @@ interface SessionData {
   lastSeenAt: string;
 }
 
+interface GeoData {
+  country: string;
+  region: string;
+  city: string;
+  timezone: string;
+}
+
 function uid(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -75,6 +85,51 @@ function readJson<T>(key: string, fallback: T): T {
 
 function writeJson<T>(key: string, value: T) {
   safeSetStorage("local", key, JSON.stringify(value));
+}
+
+function getCachedGeo(): GeoData {
+  const raw = safeGetStorage("session", GEO_KEY);
+  if (raw) {
+    try {
+      return JSON.parse(raw) as GeoData;
+    } catch {
+      // Use fallback below.
+    }
+  }
+
+  return {
+    country: "Unknown",
+    region: "",
+    city: "",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+  };
+}
+
+function saveGeo(geo: GeoData) {
+  safeSetStorage("session", GEO_KEY, JSON.stringify(geo));
+}
+
+export async function loadVisitorGeo() {
+  const cached = safeGetStorage("session", GEO_KEY);
+  if (cached) return getCachedGeo();
+
+  try {
+    const response = await fetch("/api/geo", { cache: "no-store" });
+    if (!response.ok) throw new Error("Geo lookup failed");
+    const geo = (await response.json()) as Partial<GeoData>;
+    const normalized: GeoData = {
+      country: geo.country || "Unknown",
+      region: geo.region || "",
+      city: geo.city || "",
+      timezone: geo.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+    };
+    saveGeo(normalized);
+    return normalized;
+  } catch {
+    const fallback = getCachedGeo();
+    saveGeo(fallback);
+    return fallback;
+  }
 }
 
 export function getVisitorId() {
@@ -159,6 +214,7 @@ export function trackEvent(type: AnalyticsEventType, name: string, meta?: Analyt
 
   const session = getSession();
   const utm = getUtm();
+  const geo = getCachedGeo();
   const event: AnalyticsEvent = {
     id: uid("event"),
     type,
@@ -174,6 +230,10 @@ export function trackEvent(type: AnalyticsEventType, name: string, meta?: Analyt
     device: getDevice(),
     browser: getBrowser(),
     os: getOs(),
+    country: geo.country,
+    city: geo.city,
+    region: geo.region,
+    timezone: geo.timezone,
     meta,
   };
 
@@ -268,6 +328,10 @@ export function summarizeAnalytics() {
     devices: countBy(events.map((event) => event.device)),
     browsers: countBy(events.map((event) => event.browser)),
     os: countBy(events.map((event) => event.os)),
+    countries: countBy(events.map((event) => event.country || "Unknown")),
+    cities: countBy(events.map((event) => event.city || "Unknown")),
+    regions: countBy(events.map((event) => event.region || "Unknown")),
+    timezones: countBy(events.map((event) => event.timezone || "Unknown")),
     sources: countBy(events.map((event) => event.source || "Direct")),
     campaigns: countBy(events.map((event) => event.campaign || "None")),
     avgDuration,

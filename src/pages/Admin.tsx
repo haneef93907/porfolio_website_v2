@@ -561,6 +561,9 @@ function AnalyticsPanel({
         <Breakdown title="Most viewed sections" data={analytics.sectionViews} />
         <Breakdown title="Most clicked actions" data={analytics.clicks} />
         <Breakdown title="Traffic sources" data={analytics.sources} />
+        <Breakdown title="Countries" data={analytics.countries} />
+        <Breakdown title="Cities" data={analytics.cities} />
+        <Breakdown title="Timezones" data={analytics.timezones} />
         <Breakdown title="Devices" data={analytics.devices} />
         <Breakdown title="Browsers" data={analytics.browsers} />
         <Breakdown title="Campaigns" data={analytics.campaigns} />

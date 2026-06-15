@@ -1,11 +1,13 @@
 import { useEffect } from "react";
-import { trackEvent } from "../lib/analytics";
+import { loadVisitorGeo, trackEvent } from "../lib/analytics";
 
 const SECTION_IDS = ["work", "services", "skills", "experience", "blog", "contact"];
 
 export function usePortfolioAnalytics() {
   useEffect(() => {
-    trackEvent("page_load", "Home page loaded");
+    void loadVisitorGeo().finally(() => {
+      trackEvent("page_load", "Home page loaded");
+    });
 
     const viewed = new Set<string>();
     const observer = new IntersectionObserver(
