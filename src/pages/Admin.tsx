@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import {
   addBlog,
@@ -41,6 +41,7 @@ import {
 import {
   ArrowLeft,
   BarChart3,
+  CheckCircle2,
   Download,
   Eye,
   EyeOff,
@@ -57,10 +58,12 @@ import {
   Trash2,
   Users,
   X,
+  AlertCircle,
   type LucideIcon,
 } from "lucide-react";
 
 type Tab = "overview" | "analytics" | "leads" | "projects" | "blogs" | "reports" | "security";
+type Snack = { message: string; type: "success" | "error" | "info" };
 
 interface ProjectForm {
   id?: string;
@@ -154,15 +157,23 @@ function splitComma(value: string) {
   return value.split(",").map((item) => item.trim()).filter(Boolean);
 }
 
+function mergeLocalUnsynced<T extends { id: string }>(backend: T[], local: T[]) {
+  const backendIds = new Set(backend.map((item) => item.id));
+  const localOnly = local.filter((item) => item.id && !backendIds.has(item.id));
+  return localOnly.length ? [...backend, ...localOnly] : backend;
+}
+
 function imageUpload(
   setValue: (value: string) => void,
   getCredentials: () => AdminWriteCredentials,
   setStatus: (value: string) => void,
+  setUploading: (value: boolean) => void,
   folder: "projects" | "blogs"
 ) {
   return (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    setUploading(true);
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = String(reader.result);
@@ -175,7 +186,11 @@ function imageUpload(
             ? "Image uploaded to Supabase Storage. Save the item to publish this URL."
             : `Image is only local right now. Upload failed: ${result.error || "Supabase Storage is not configured."}`
         );
-      });
+      }).finally(() => setUploading(false));
+    };
+    reader.onerror = () => {
+      setUploading(false);
+      setStatus("Image could not be read. Please try again.");
     };
     reader.readAsDataURL(file);
     event.target.value = "";
@@ -194,6 +209,8 @@ export default function Admin() {
   const [leads, setLeads] = useState<ContactLead[]>(() => getContactLeads());
   const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEvent[]>(() => getAnalyticsEvents());
   const [backendStatus, setBackendStatus] = useState("Checking content backend...");
+  const [snack, setSnack] = useState<Snack | null>(null);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [analyticsVersion, setAnalyticsVersion] = useState(0);
   const [projectForm, setProjectForm] = useState<ProjectForm | null>(null);
   const [blogForm, setBlogForm] = useState<BlogForm | null>(null);
@@ -232,6 +249,16 @@ export default function Admin() {
     password: sessionStorage.getItem("portfolio-admin-password") || password,
   });
 
+  const notify = useCallback((message: string, type: Snack["type"] = "info") => {
+    setSnack({ message, type });
+  }, []);
+
+  useEffect(() => {
+    if (!snack) return;
+    const timer = window.setTimeout(() => setSnack(null), 4200);
+    return () => window.clearTimeout(timer);
+  }, [snack]);
+
   useEffect(() => {
     if (!loggedIn) return;
     let active = true;
@@ -240,6 +267,8 @@ export default function Admin() {
       email: sessionStorage.getItem("portfolio-admin-email") || email,
       password: sessionStorage.getItem("portfolio-admin-password") || password,
     };
+    const localProjectsBeforeLoad = getProjects();
+    const localBlogsBeforeLoad = getBlogs();
 
     void Promise.all([
       loadContent<SiteContent>("site", defaultSiteContent),
@@ -247,8 +276,32 @@ export default function Admin() {
       loadContent<BlogPost[]>("blogs", getBlogs()),
     ]).then(async ([siteResult, projectResult, blogResult]) => {
       if (!active) return;
-      setProjects(projectResult.data);
-      setBlogs(blogResult.data);
+      const nextProjects = projectResult.source === "backend"
+        ? mergeLocalUnsynced(projectResult.data, localProjectsBeforeLoad)
+        : projectResult.data;
+      const nextBlogs = blogResult.source === "backend"
+        ? mergeLocalUnsynced(blogResult.data, localBlogsBeforeLoad)
+        : blogResult.data;
+      const recoveredLocalProjects = nextProjects.length !== projectResult.data.length;
+      const recoveredLocalBlogs = nextBlogs.length !== blogResult.data.length;
+      setProjects(nextProjects);
+      setBlogs(nextBlogs);
+
+      if (recoveredLocalProjects || recoveredLocalBlogs) {
+        const [savedProjects, savedBlogs] = await Promise.all([
+          recoveredLocalProjects ? saveContent("projects", nextProjects, adminCredentials) : Promise.resolve(projectResult),
+          recoveredLocalBlogs ? saveContent("blogs", nextBlogs, adminCredentials) : Promise.resolve(blogResult),
+        ]);
+        if (!active) return;
+        const recoveredOk = savedProjects.source === "backend" && savedBlogs.source === "backend";
+        const message = recoveredOk
+          ? "Recovered local admin changes and saved them to Supabase."
+          : `Recovered local admin changes, but backend save still failed: ${savedProjects.error || savedBlogs.error || "Unknown error."}`;
+        setBackendStatus(message);
+        notify(message, recoveredOk ? "success" : "error");
+        return;
+      }
+
       const backendOk = siteResult.source === "backend" && projectResult.source === "backend" && blogResult.source === "backend";
       if (!backendOk) {
         const [seededSite, seededProjects, seededBlogs] = await Promise.all([
@@ -257,18 +310,18 @@ export default function Admin() {
             : saveContent("site", siteResult.data, adminCredentials),
           projectResult.source === "backend"
             ? Promise.resolve(projectResult)
-            : saveContent("projects", projectResult.data, adminCredentials),
+            : saveContent("projects", nextProjects, adminCredentials),
           blogResult.source === "backend"
             ? Promise.resolve(blogResult)
-            : saveContent("blogs", blogResult.data, adminCredentials),
+            : saveContent("blogs", nextBlogs, adminCredentials),
         ]);
         if (!active) return;
         const seededOk = seededSite.source === "backend" && seededProjects.source === "backend" && seededBlogs.source === "backend";
-        setBackendStatus(
-          seededOk
-            ? "Connected to backend. Existing site, projects, and blog content has been seeded to Supabase."
-            : `Local fallback only. Configure Supabase env vars/table/bucket on Vercel. ${seededSite.error || seededProjects.error || seededBlogs.error || ""}`
-        );
+        const message = seededOk
+          ? "Connected to backend. Existing site, projects, and blog content has been seeded to Supabase."
+          : `Local fallback only. Configure Supabase env vars/table/bucket on Vercel. ${seededSite.error || seededProjects.error || seededBlogs.error || ""}`;
+        setBackendStatus(message);
+        notify(message, seededOk ? "success" : "error");
         return;
       }
       setBackendStatus(
@@ -287,26 +340,26 @@ export default function Admin() {
     return () => {
       active = false;
     };
-  }, [loggedIn, email, password]);
+  }, [loggedIn, email, password, notify]);
 
-  const persistProjects = async (nextProjects: Project[]) => {
+  const persistProjects = async (nextProjects: Project[], successMessage = "Project changes saved to database.") => {
     setProjects(nextProjects);
     const result = await saveContent("projects", nextProjects, credentials());
-    setBackendStatus(
-      result.source === "backend"
-        ? "Saved to backend. Changes are public and persistent."
-        : `Saved only in this browser. Backend save failed: ${result.error || "Not configured."}`
-    );
+    const message = result.source === "backend"
+      ? successMessage
+      : `Project saved only in this browser. Database save failed: ${result.error || "Not configured."}`;
+    setBackendStatus(message);
+    notify(message, result.source === "backend" ? "success" : "error");
   };
 
-  const persistBlogs = async (nextBlogs: BlogPost[]) => {
+  const persistBlogs = async (nextBlogs: BlogPost[], successMessage = "Blog changes saved to database.") => {
     setBlogs(nextBlogs);
     const result = await saveContent("blogs", nextBlogs, credentials());
-    setBackendStatus(
-      result.source === "backend"
-        ? "Saved to backend. Changes are public and persistent."
-        : `Saved only in this browser. Backend save failed: ${result.error || "Not configured."}`
-    );
+    const message = result.source === "backend"
+      ? successMessage
+      : `Blog saved only in this browser. Database save failed: ${result.error || "Not configured."}`;
+    setBackendStatus(message);
+    notify(message, result.source === "backend" ? "success" : "error");
   };
 
   const saveProjectForm = () => {
@@ -340,7 +393,11 @@ export default function Admin() {
       published: projectForm.published,
     };
 
-    void persistProjects(projectForm.id ? updateProject(projectForm.id, payload) : addProject(payload));
+    const editing = Boolean(projectForm.id);
+    void persistProjects(
+      editing ? updateProject(projectForm.id!, payload) : addProject(payload),
+      editing ? "Project updated successfully in database." : "Project added successfully to database."
+    );
     setProjectForm(null);
   };
 
@@ -361,7 +418,11 @@ export default function Admin() {
       published: blogForm.published,
     };
 
-    void persistBlogs(blogForm.id ? updateBlog(blogForm.id, payload) : addBlog(payload));
+    const editing = Boolean(blogForm.id);
+    void persistBlogs(
+      editing ? updateBlog(blogForm.id!, payload) : addBlog(payload),
+      editing ? "Blog updated successfully in database." : "Blog added successfully to database."
+    );
     setBlogForm(null);
   };
 
@@ -529,6 +590,8 @@ export default function Admin() {
                 onCancel={() => setProjectForm(null)}
                 getCredentials={credentials}
                 setStatus={setBackendStatus}
+                uploadingMedia={uploadingMedia}
+                setUploadingMedia={setUploadingMedia}
               />
             )}
             <div className="grid gap-4">
@@ -591,6 +654,8 @@ export default function Admin() {
                 onCancel={() => setBlogForm(null)}
                 getCredentials={credentials}
                 setStatus={setBackendStatus}
+                uploadingMedia={uploadingMedia}
+                setUploadingMedia={setUploadingMedia}
               />
             )}
             <div className="grid gap-4">
@@ -631,7 +696,27 @@ export default function Admin() {
 
         {tab === "security" && <SecurityPanel />}
       </div>
+      {snack && <AdminSnack snack={snack} onClose={() => setSnack(null)} />}
     </main>
+  );
+}
+
+function AdminSnack({ snack, onClose }: { snack: Snack; onClose: () => void }) {
+  const Icon = snack.type === "error" ? AlertCircle : CheckCircle2;
+  const tone = snack.type === "error"
+    ? "border-red-500/40 bg-red-950 text-red-100"
+    : snack.type === "success"
+      ? "border-emerald-500/40 bg-emerald-950 text-emerald-100"
+      : "border-border bg-card text-foreground";
+
+  return (
+    <div className={`fixed bottom-5 right-5 z-50 flex max-w-sm items-start gap-3 rounded border px-4 py-3 text-sm shadow-2xl ${tone}`}>
+      <Icon size={18} className="mt-0.5 shrink-0" />
+      <p className="leading-relaxed">{snack.message}</p>
+      <button onClick={onClose} className="ml-2 shrink-0 opacity-70 hover:opacity-100" aria-label="Close notification">
+        <X size={16} />
+      </button>
+    </div>
   );
 }
 
@@ -922,13 +1007,15 @@ function Field(props: {
   );
 }
 
-function ProjectEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus }: {
+function ProjectEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus, uploadingMedia, setUploadingMedia }: {
   form: ProjectForm;
   setForm: (form: ProjectForm) => void;
   onSave: () => void;
   onCancel: () => void;
   getCredentials: () => AdminWriteCredentials;
   setStatus: (value: string) => void;
+  uploadingMedia: boolean;
+  setUploadingMedia: (value: boolean) => void;
 }) {
   return (
     <div className="mb-8 rounded border border-border bg-card p-5">
@@ -948,7 +1035,7 @@ function ProjectEditor({ form, setForm, onSave, onCancel, getCredentials, setSta
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={imageUpload((image) => setForm({ ...form, image }), getCredentials, setStatus, "projects")}
+            onChange={imageUpload((image) => setForm({ ...form, image }), getCredentials, setStatus, setUploadingMedia, "projects")}
           />
         </label>
         <Field label="Description" value={form.description} onChange={(description) => setForm({ ...form, description })} textarea />
@@ -967,18 +1054,20 @@ function ProjectEditor({ form, setForm, onSave, onCancel, getCredentials, setSta
         <Field label="SEO Description" value={form.seoDescription} onChange={(seoDescription) => setForm({ ...form, seoDescription })} textarea />
       </div>
       <Checks featured={form.featured} published={form.published} onFeatured={(featured) => setForm({ ...form, featured })} onPublished={(published) => setForm({ ...form, published })} />
-      <EditorActions disabled={!form.title || !form.description} onSave={onSave} onCancel={onCancel} />
+      <EditorActions disabled={!form.title || !form.description || uploadingMedia} onSave={onSave} onCancel={onCancel} />
     </div>
   );
 }
 
-function BlogEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus }: {
+function BlogEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus, uploadingMedia, setUploadingMedia }: {
   form: BlogForm;
   setForm: (form: BlogForm) => void;
   onSave: () => void;
   onCancel: () => void;
   getCredentials: () => AdminWriteCredentials;
   setStatus: (value: string) => void;
+  uploadingMedia: boolean;
+  setUploadingMedia: (value: boolean) => void;
 }) {
   return (
     <div className="mb-8 rounded border border-border bg-card p-5">
@@ -998,7 +1087,7 @@ function BlogEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={imageUpload((image) => setForm({ ...form, image }), getCredentials, setStatus, "blogs")}
+            onChange={imageUpload((image) => setForm({ ...form, image }), getCredentials, setStatus, setUploadingMedia, "blogs")}
           />
         </label>
         <Field label="Excerpt" value={form.excerpt} onChange={(excerpt) => setForm({ ...form, excerpt })} textarea />
@@ -1012,7 +1101,7 @@ function BlogEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus
         <input type="checkbox" checked={form.published} onChange={(event) => setForm({ ...form, published: event.target.checked })} />
         Published
       </label>
-      <EditorActions disabled={!form.title || !form.excerpt || !form.content} onSave={onSave} onCancel={onCancel} />
+      <EditorActions disabled={!form.title || !form.excerpt || !form.content || uploadingMedia} onSave={onSave} onCancel={onCancel} />
     </div>
   );
 }

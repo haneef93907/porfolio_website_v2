@@ -50,7 +50,7 @@ async function supabaseRequest(path, options = {}) {
       apikey: serviceKey,
       Authorization: `Bearer ${serviceKey}`,
       "Content-Type": "application/json",
-      Prefer: "return=representation",
+      Prefer: "resolution=merge-duplicates,return=representation",
       ...(options.headers || {}),
     },
   });
