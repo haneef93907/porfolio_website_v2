@@ -1,20 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
+import { getBlogs, resetBlogs, type BlogPost } from "../data/blogs";
 import {
-  addBlog,
-  deleteBlog,
-  getBlogs,
-  resetBlogs,
-  updateBlog,
-  type BlogPost,
-} from "../data/blogs";
-import {
-  addProject,
-  deleteProject,
   getProjects,
   resetProjects,
   slugify,
-  updateProject,
   type Project,
 } from "../data/projects";
 import { defaultSiteContent, type SiteContent } from "../data/siteContent";
@@ -161,6 +151,21 @@ function mergeLocalUnsynced<T extends { id: string }>(backend: T[], local: T[]) 
   const backendIds = new Set(backend.map((item) => item.id));
   const localOnly = local.filter((item) => item.id && !backendIds.has(item.id));
   return localOnly.length ? [...backend, ...localOnly] : backend;
+}
+
+function upsertById<T extends { id: string }>(items: T[], id: string | undefined, payload: Omit<T, "id">, idPrefix: string) {
+  if (!id) {
+    return [...items, { ...payload, id: `${idPrefix}-${Date.now()}` } as T];
+  }
+
+  let found = false;
+  const updated = items.map((item) => {
+    if (item.id !== id) return item;
+    found = true;
+    return { ...item, ...payload, id };
+  });
+
+  return found ? updated : [...updated, { ...payload, id } as T];
 }
 
 function imageUpload(
@@ -364,7 +369,7 @@ export default function Admin() {
 
   const saveProjectForm = () => {
     if (!projectForm) return;
-    const payload = {
+    const payload: Omit<Project, "id"> = {
       slug: projectForm.slug || slugify(projectForm.title),
       title: projectForm.title,
       description: projectForm.description,
@@ -395,7 +400,7 @@ export default function Admin() {
 
     const editing = Boolean(projectForm.id);
     void persistProjects(
-      editing ? updateProject(projectForm.id!, payload) : addProject(payload),
+      upsertById(projects, projectForm.id, payload, "project"),
       editing ? "Project updated successfully in database." : "Project added successfully to database."
     );
     setProjectForm(null);
@@ -403,7 +408,7 @@ export default function Admin() {
 
   const saveBlogForm = () => {
     if (!blogForm) return;
-    const payload = {
+    const payload: Omit<BlogPost, "id"> = {
       slug: blogForm.slug || slugify(blogForm.title),
       title: blogForm.title,
       excerpt: blogForm.excerpt,
@@ -420,7 +425,7 @@ export default function Admin() {
 
     const editing = Boolean(blogForm.id);
     void persistBlogs(
-      editing ? updateBlog(blogForm.id!, payload) : addBlog(payload),
+      upsertById(blogs, blogForm.id, payload, "blog"),
       editing ? "Blog updated successfully in database." : "Blog added successfully to database."
     );
     setBlogForm(null);
@@ -630,8 +635,16 @@ export default function Admin() {
                       published: project.published,
                     })
                   }
-                  onToggle={() => void persistProjects(updateProject(project.id, { published: !project.published }))}
-                  onDelete={() => window.confirm("Delete project?") && void persistProjects(deleteProject(project.id))}
+                  onToggle={() =>
+                    void persistProjects(
+                      projects.map((item) => item.id === project.id ? { ...item, published: !item.published } : item),
+                      project.published ? "Project unpublished in database." : "Project published in database."
+                    )
+                  }
+                  onDelete={() =>
+                    window.confirm("Delete project?") &&
+                    void persistProjects(projects.filter((item) => item.id !== project.id), "Project deleted from database.")
+                  }
                   toggleLabel={project.published ? "Unpublish" : "Publish"}
                 />
               ))}
@@ -683,8 +696,16 @@ export default function Admin() {
                       published: blog.published,
                     })
                   }
-                  onToggle={() => void persistBlogs(updateBlog(blog.id, { published: !blog.published }))}
-                  onDelete={() => window.confirm("Delete blog?") && void persistBlogs(deleteBlog(blog.id))}
+                  onToggle={() =>
+                    void persistBlogs(
+                      blogs.map((item) => item.id === blog.id ? { ...item, published: !item.published } : item),
+                      blog.published ? "Blog unpublished in database." : "Blog published in database."
+                    )
+                  }
+                  onDelete={() =>
+                    window.confirm("Delete blog?") &&
+                    void persistBlogs(blogs.filter((item) => item.id !== blog.id), "Blog deleted from database.")
+                  }
                   toggleLabel={blog.published ? "Unpublish" : "Publish"}
                 />
               ))}
