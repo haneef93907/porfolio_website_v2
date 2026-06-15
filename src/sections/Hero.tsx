@@ -1,11 +1,7 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
 import DigitFallClock from "../components/DigitFallClock";
 import { ArrowDown, Download, MessageCircle, Send } from "lucide-react";
 
 export default function Hero() {
-  const heroRef = useRef<HTMLDivElement>(null);
-
   const handleScrollToWork = () => {
     const el = document.querySelector("#work");
     if (el) {
@@ -20,54 +16,8 @@ export default function Hero() {
     }
   };
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".hero-label", {
-        duration: 0.8,
-        y: 20,
-        opacity: 0,
-        ease: "power2.out",
-      });
-
-      gsap.from(".hero-name", {
-        duration: 1,
-        y: 30,
-        opacity: 0,
-        ease: "power2.out",
-        delay: 0.1,
-      });
-
-      gsap.from(".hero-title", {
-        duration: 0.8,
-        y: 20,
-        opacity: 0,
-        ease: "power2.out",
-        delay: 0.2,
-      });
-
-      gsap.from(".hero-description", {
-        duration: 0.8,
-        y: 20,
-        opacity: 0,
-        ease: "power2.out",
-        delay: 0.3,
-      });
-
-      gsap.from(".hero-button", {
-        duration: 0.8,
-        y: 20,
-        opacity: 0,
-        ease: "power2.out",
-        delay: 0.4,
-      });
-    }, heroRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
-      ref={heroRef}
       className="hero-surface relative min-h-[100dvh] overflow-hidden flex transition-colors duration-300"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_38%,hsl(var(--primary)/0.11),transparent_28%),radial-gradient(circle_at_84%_66%,hsl(var(--accent)/0.11),transparent_34%)]" />

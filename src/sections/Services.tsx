@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import {
   Bug,
   Cloud,
@@ -9,10 +8,6 @@ import {
   Smartphone,
   Store,
 } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const services = [
   {
@@ -58,30 +53,8 @@ const services = [
 ];
 
 export default function Services() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-    const cards = sectionRef.current.querySelectorAll(".service-card");
-    gsap.fromTo(
-      cards,
-      { opacity: 0, y: 36 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        stagger: 0.07,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 75%",
-        },
-      }
-    );
-  }, []);
-
   return (
-    <section id="services" ref={sectionRef} className="bg-background py-24 sm:py-32">
+    <section id="services" className="bg-background py-24 sm:py-32">
       <div className="mx-auto max-w-[1200px] px-6">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
           Services

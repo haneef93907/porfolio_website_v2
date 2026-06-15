@@ -1,9 +1,4 @@
-import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { safeArray } from "../lib/utils";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface ExperienceEntry {
   company: string;
@@ -46,35 +41,8 @@ const experiences: ExperienceEntry[] = [
 ];
 
 function ExperienceCard({ entry }: { entry: ExperienceEntry }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!cardRef.current) return;
-
-    gsap.fromTo(
-      cardRef.current,
-      { opacity: 0, y: 40 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: cardRef.current,
-          start: "top 80%",
-          toggleActions: "play none none none",
-        },
-      }
-    );
-
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
-  }, []);
-
   return (
     <div
-      ref={cardRef}
       className={`relative bg-card border border-border border-l-[3px] border-l-primary p-6 sm:p-8 rounded shadow-lg ${
         entry.align === "left" ? "lg:mr-auto" : "lg:ml-auto"
       } lg:max-w-[700px]`}

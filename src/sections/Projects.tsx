@@ -1,14 +1,10 @@
-import { useRef, useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { getPublishedProjects, type Project } from "../data/projects";
 import { safeArray } from "../lib/utils";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight, ExternalLink, Store } from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger);
-
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({ project, priority }: { project: Project; priority: boolean }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -21,6 +17,8 @@ function ProjectCard({ project }: { project: Project }) {
         <img
           src={project.image}
           alt={project.title}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
           className={`w-full h-full object-cover transition-transform duration-500 ${
             hovered ? "scale-105" : "scale-100"
           }`}
@@ -119,48 +117,11 @@ function ProjectCard({ project }: { project: Project }) {
 }
 
 export default function Projects() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
   const [projects] = useState<Project[]>(() => getPublishedProjects());
-
-  useEffect(() => {
-    if (!sectionRef.current || !gridRef.current || projects.length === 0) return;
-
-    const cards = gridRef.current.querySelectorAll(".project-card");
-    gsap.set(cards, {
-      clearProps: "transform",
-      rotationX: 0,
-      rotationY: 0,
-      z: 0,
-      yPercent: 0,
-    });
-
-    gsap.fromTo(
-      cards,
-      { opacity: 0, y: 36 },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.08,
-        duration: 0.65,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: gridRef.current,
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      }
-    );
-
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
-  }, [projects]);
 
   return (
     <section
       id="work"
-      ref={sectionRef}
       className="relative bg-secondary/40 py-24 sm:py-32 lg:py-40"
     >
       <div className="max-w-[1200px] mx-auto px-6">
@@ -176,12 +137,9 @@ export default function Projects() {
           readiness.
         </p>
 
-        <div
-          ref={gridRef}
-          className="projects-grid relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8"
-        >
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+        <div className="projects-grid relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+          {projects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} priority={index < 2} />
           ))}
         </div>
       </div>

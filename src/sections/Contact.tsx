@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import {
   Linkedin,
   Github,
@@ -10,10 +10,6 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 type SubmitStatus = "idle" | "sending" | "sent" | "error";
 
@@ -26,29 +22,6 @@ export default function Contact() {
     message: "",
   });
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-
-    const elements = sectionRef.current.querySelectorAll(".contact-animate");
-    gsap.fromTo(
-      elements,
-      { opacity: 0, y: 30 },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.1,
-        duration: 0.6,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          toggleActions: "play none none none",
-        },
-      }
-    );
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +94,6 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      ref={sectionRef}
       className="relative bg-background py-24 sm:py-32 lg:py-40 border-t border-border"
     >
       <div className="max-w-[1100px] mx-auto px-6">

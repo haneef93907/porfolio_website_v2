@@ -1,9 +1,4 @@
-import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { safeArray } from "../lib/utils";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface SkillCategory {
   title: string;
@@ -145,58 +140,14 @@ const skills: SkillCategory[] = [
 ];
 
 function SkillItem({ skill }: { skill: SkillCategory }) {
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const itemsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!headingRef.current || !itemsRef.current) return;
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: headingRef.current,
-        start: "top 80%",
-        toggleActions: "play none none none",
-      },
-    });
-
-    tl.fromTo(
-      headingRef.current,
-      { opacity: 0, y: 12 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.75,
-        ease: "power2.out",
-      }
-    );
-
-    tl.fromTo(
-      itemsRef.current.children,
-      { opacity: 0, x: -20 },
-      {
-        opacity: 1,
-        x: 0,
-        stagger: 0.08,
-        duration: 0.4,
-        ease: "power2.out",
-      },
-      "-=0.3"
-    );
-
-    return () => {
-      tl.kill();
-    };
-  }, []);
-
   return (
     <div className="mb-10 last:mb-0">
       <h3
-        ref={headingRef}
         className="font-grotesk font-semibold text-xl sm:text-2xl lg:text-[28px] text-foreground mb-4"
       >
         {skill.title}
       </h3>
-      <div ref={itemsRef} className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         {safeArray(skill.items).map((item) => (
           <span
             key={item}
@@ -211,12 +162,9 @@ function SkillItem({ skill }: { skill: SkillCategory }) {
 }
 
 export default function Skills() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
   return (
     <section
       id="skills"
-      ref={sectionRef}
       className="relative bg-background py-24 sm:py-32 lg:py-40"
     >
       <div className="max-w-[1200px] mx-auto px-6">

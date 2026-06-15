@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
-import gsap from 'gsap';
 import { getPublishedBlogs } from '../data/blogs';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -14,8 +13,6 @@ import { Badge } from '../components/ui/badge';
 export default function Blog() {
   const location = useLocation();
   const standalone = location.pathname === '/blog';
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const blogs = getPublishedBlogs();
 
@@ -25,41 +22,9 @@ export default function Blog() {
     ? blogs
     : blogs.filter(blog => blog.category === selectedCategory);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from('.blog-header', {
-        duration: 0.8,
-        y: 30,
-        opacity: 0,
-        ease: 'power2.out',
-      });
-
-      gsap.from('.blog-category-btn', {
-        duration: 0.6,
-        x: -20,
-        opacity: 0,
-        stagger: 0.1,
-        ease: 'power2.out',
-        delay: 0.2,
-      });
-
-      gsap.from(cardsRef.current.filter(Boolean), {
-        duration: 0.75,
-        y: 44,
-        opacity: 0,
-        stagger: 0.08,
-        ease: 'power2.out',
-        delay: 0.25,
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, [filteredBlogs]);
-
   const content = (
     <section
       id="blog"
-      ref={sectionRef}
       className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-background transition-colors duration-300 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto">
@@ -86,12 +51,9 @@ export default function Blog() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBlogs.map((blog, index) => (
+          {filteredBlogs.map((blog) => (
             <div
               key={blog.id}
-              ref={(el) => {
-                if (el) cardsRef.current[index] = el;
-              }}
             >
               <Card className="h-full cursor-pointer group bg-card border-border motion-card">
                 <CardHeader>
