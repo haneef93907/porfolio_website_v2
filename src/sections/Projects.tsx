@@ -28,7 +28,7 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
+      <div className="flex flex-1 flex-col p-4 sm:p-6">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary break-words">
             {project.category}
@@ -40,15 +40,15 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
           {safeArray(project.technologies).slice(0, 6).map((tech) => (
             <span
               key={tech}
-              className="rounded border border-accent/20 bg-accent/10 px-2.5 py-1 font-mono text-[11px] text-accent"
+              className="max-w-full break-words rounded border border-accent/20 bg-accent/10 px-2.5 py-1 font-mono text-[10px] leading-snug text-accent sm:text-[11px]"
             >
               {tech}
             </span>
           ))}
         </div>
 
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <h3 className="min-w-0 font-grotesk font-semibold text-xl sm:text-2xl text-foreground group-hover:text-primary transition-colors break-words">
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <h3 className="min-w-0 text-balance font-grotesk text-xl font-semibold leading-tight text-foreground transition-colors break-words group-hover:text-primary sm:text-2xl">
             {project.title}
           </h3>
           {(project.links.website || project.links.playStore || project.links.appStore || project.link) && (
@@ -65,7 +65,7 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
           )}
         </div>
 
-        <p className="mb-4 text-sm leading-relaxed text-muted-foreground line-clamp-3">
+        <p className="mb-4 text-sm leading-relaxed text-muted-foreground sm:line-clamp-3">
           {project.overview || project.description}
         </p>
 
@@ -92,10 +92,10 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
           </p>
         )}
 
-        <div className="mt-auto flex flex-col sm:flex-row gap-3">
+        <div className="mt-auto grid gap-3 sm:grid-cols-[1fr_auto]">
           <Link
             to={`/projects/${project.slug}`}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded bg-primary px-4 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-primary px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground transition hover:bg-primary/90 sm:text-sm"
           >
             View Case Study
             <ArrowRight size={15} />
@@ -105,7 +105,7 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
               href={project.links.playStore || project.links.appStore}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded border border-border px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:text-primary"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-border px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:text-primary"
             >
               <Store size={15} />
               Store

@@ -108,21 +108,21 @@ export default function Contact({ content = defaultSiteContent.contact }: { cont
       id="contact"
       className="relative bg-background py-24 sm:py-32 lg:py-40 border-t border-border"
     >
-      <div className="max-w-[1100px] mx-auto px-6">
-        <div className="contact-animate text-center mb-12">
+      <div className="max-w-[1100px] mx-auto px-5 sm:px-6">
+        <div className="contact-animate text-center mb-10 sm:mb-12">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
             {content.eyebrow}
           </p>
-          <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-6">
+          <h2 className="text-balance font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-6">
             {content.title}
           </h2>
 
-          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
             {content.description}
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+        <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr] lg:gap-8">
           <aside className="contact-animate rounded border border-border bg-card p-6">
             <h3 className="font-grotesk text-xl font-semibold text-foreground">
               Direct contact
@@ -170,74 +170,74 @@ export default function Contact({ content = defaultSiteContent.contact }: { cont
             </div>
           </aside>
 
-        <form onSubmit={handleSubmit} className="contact-animate text-left space-y-4 rounded border border-border bg-card p-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="block text-sm text-muted-foreground mb-1.5">Name</label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
-              placeholder="Your name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-muted-foreground mb-1.5">Email</label>
-            <input
-              type="email"
-              required
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
-              placeholder="your@email.com"
-            />
-          </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm text-muted-foreground mb-1.5">Project Type</label>
-              <select
-                value={formData.projectType}
-                onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
-                className="w-full bg-background border border-border rounded px-4 py-3 text-foreground focus:border-primary focus:outline-none transition-colors"
-              >
-                {content.projectTypes.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
+          <form onSubmit={handleSubmit} className="contact-animate space-y-4 rounded border border-border bg-card p-5 text-left sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1.5">Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
+                  placeholder="Your name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1.5">Email</label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
+                  placeholder="your@email.com"
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1.5">Project Type</label>
+                <select
+                  value={formData.projectType}
+                  onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
+                  className="w-full bg-background border border-border rounded px-4 py-3 text-foreground focus:border-primary focus:outline-none transition-colors"
+                >
+                  {content.projectTypes.map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1.5">Budget Range</label>
+                <select
+                  value={formData.budget}
+                  onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                  className="w-full bg-background border border-border rounded px-4 py-3 text-foreground focus:border-primary focus:outline-none transition-colors"
+                >
+                  {content.budgetRanges.map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div>
-              <label className="block text-sm text-muted-foreground mb-1.5">Budget Range</label>
-              <select
-                value={formData.budget}
-                onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                className="w-full bg-background border border-border rounded px-4 py-3 text-foreground focus:border-primary focus:outline-none transition-colors"
-              >
-                {content.budgetRanges.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
+              <label className="block text-sm text-muted-foreground mb-1.5">Message</label>
+              <textarea
+                required
+                rows={4}
+                value={formData.message}
+                onChange={(e) =>
+                  setFormData({ ...formData, message: e.target.value })
+                }
+                className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors resize-none"
+                placeholder="Tell me about your project..."
+              />
             </div>
-          </div>
-          <div>
-            <label className="block text-sm text-muted-foreground mb-1.5">Message</label>
-            <textarea
-              required
-              rows={4}
-              value={formData.message}
-              onChange={(e) =>
-                setFormData({ ...formData, message: e.target.value })
-              }
-              className="w-full bg-background border border-border rounded px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors resize-none"
-              placeholder="Tell me about your project..."
-            />
-          </div>
 
           <button
             type="submit"
@@ -272,11 +272,11 @@ export default function Contact({ content = defaultSiteContent.contact }: { cont
         </form>
         </div>
 
-        <div className="contact-animate mt-12 flex flex-wrap items-center justify-center gap-3">
+        <div className="contact-animate mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
           <a
             href={`mailto:${content.email}`}
             data-track="Contact CTA email"
-            className="inline-flex items-center justify-center gap-2 rounded bg-primary px-5 py-3 font-grotesk text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded bg-primary px-5 py-3 text-center font-grotesk text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground transition-colors hover:bg-primary/90 sm:text-sm"
           >
             <Mail size={17} />
             Email Me
@@ -286,7 +286,7 @@ export default function Contact({ content = defaultSiteContent.contact }: { cont
             data-track="Contact CTA WhatsApp"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded border border-emerald-500/40 px-5 py-3 font-grotesk text-sm font-semibold uppercase tracking-wider text-emerald-500 transition-colors hover:border-emerald-400 hover:text-emerald-400"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded border border-emerald-500/40 px-5 py-3 text-center font-grotesk text-xs font-semibold uppercase tracking-[0.12em] text-emerald-500 transition-colors hover:border-emerald-400 hover:text-emerald-400 sm:text-sm"
           >
             <MessageCircle size={17} />
             WhatsApp Me
@@ -296,7 +296,7 @@ export default function Contact({ content = defaultSiteContent.contact }: { cont
             data-track="Contact CTA LinkedIn"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded border border-border px-5 py-3 font-grotesk text-sm font-semibold uppercase tracking-wider text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded border border-border px-5 py-3 text-center font-grotesk text-xs font-semibold uppercase tracking-[0.12em] text-foreground transition-colors hover:border-primary/50 hover:text-primary sm:text-sm"
           >
             <Linkedin size={17} />
             LinkedIn
@@ -304,7 +304,7 @@ export default function Contact({ content = defaultSiteContent.contact }: { cont
           <a
             href={resumeUrl}
             data-track="Contact CTA resume"
-            className="inline-flex items-center justify-center gap-2 rounded border border-border px-5 py-3 font-grotesk text-sm font-semibold uppercase tracking-wider text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded border border-border px-5 py-3 text-center font-grotesk text-xs font-semibold uppercase tracking-[0.12em] text-foreground transition-colors hover:border-primary/50 hover:text-primary sm:text-sm"
           >
             Download CV
           </a>
