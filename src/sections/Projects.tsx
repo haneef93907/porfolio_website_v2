@@ -1,27 +1,23 @@
-import { useState } from "react";
+import { memo, useMemo } from "react";
 import { Link } from "react-router";
 import { getPublishedProjects, type Project } from "../data/projects";
 import { safeArray } from "../lib/utils";
 import { ArrowRight, ExternalLink, Store } from "lucide-react";
 
-function ProjectCard({ project, priority }: { project: Project; priority: boolean }) {
-  const [hovered, setHovered] = useState(false);
-
+const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
   return (
     <article
       className="project-card group relative flex h-full min-h-0 flex-col bg-card border border-border rounded overflow-hidden transition-all duration-300 hover:border-primary/50 motion-card"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       <div className="relative aspect-video overflow-hidden">
         <img
           src={project.image}
           alt={project.title}
-          loading={priority ? "eager" : "lazy"}
+          width={1344}
+          height={768}
+          loading="eager"
           decoding="async"
-          className={`w-full h-full object-cover transition-transform duration-500 ${
-            hovered ? "scale-105" : "scale-100"
-          }`}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
         {project.featured && (
@@ -114,10 +110,10 @@ function ProjectCard({ project, priority }: { project: Project; priority: boolea
       </div>
     </article>
   );
-}
+});
 
 export default function Projects() {
-  const [projects] = useState<Project[]>(() => getPublishedProjects());
+  const projects = useMemo<Project[]>(() => getPublishedProjects(), []);
 
   return (
     <section
@@ -138,8 +134,8 @@ export default function Projects() {
         </p>
 
         <div className="projects-grid relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-          {projects.map((project, index) => (
-            <ProjectCard key={project.id} project={project} priority={index < 2} />
+          {projects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
           ))}
         </div>
       </div>

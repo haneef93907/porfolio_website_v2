@@ -18,7 +18,7 @@ export default function Hero() {
 
   return (
     <section
-      className="hero-surface relative min-h-[100dvh] overflow-hidden flex transition-colors duration-300"
+      className="hero-surface relative min-h-[100dvh] overflow-hidden flex"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_38%,hsl(var(--primary)/0.11),transparent_28%),radial-gradient(circle_at_84%_66%,hsl(var(--accent)/0.11),transparent_34%)]" />
 
@@ -49,7 +49,7 @@ export default function Hero() {
             </button>
             <button
               onClick={handleScrollToWork}
-              className="inline-flex items-center justify-center gap-2 border border-border bg-card/80 text-foreground font-grotesk font-semibold text-sm uppercase tracking-wider px-6 py-3.5 rounded backdrop-blur hover:border-primary/50 hover:text-primary transition-colors"
+              className="inline-flex items-center justify-center gap-2 border border-border bg-card/80 text-foreground font-grotesk font-semibold text-sm uppercase tracking-wider px-6 py-3.5 rounded hover:border-primary/50 hover:text-primary transition-colors"
             >
               <ArrowDown size={16} />
               View Projects

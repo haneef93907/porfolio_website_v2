@@ -5,11 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("theme") || "dark";
+          document.documentElement.setAttribute("data-theme", theme);
+          document.documentElement.classList.toggle("dark", theme === "dark");
+        } catch (error) {
+          document.documentElement.setAttribute("data-theme", "dark");
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/assets/index-DLy1j2XT.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-u86Kv-UA.css">
+    <script type="module" crossorigin src="/assets/index-Bcaszf-_.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CCMylzSO.css">
   
     <title>Creating Beautiful Animations in Flutter</title>
     <meta name="description" content="Learn how Flutter animations improve product polish, user experience, and mobile app quality." />
@@ -23,7 +35,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Creating Beautiful Animations in Flutter","description":"Learn how Flutter animations improve product polish, user experience, and mobile app quality.","datePublished":"2024-01-05","author":{"@type":"Person","name":"Muhammad Haneef"}}</script>
   </head>
-  <body>
+  <body style="background:#0a0a0a">
     <div id="root"></div>
   </body>
 </html>

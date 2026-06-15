@@ -14,14 +14,14 @@ const navLinks = [
 export default function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(
+    () => typeof window !== "undefined" && window.scrollY > 100
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     let frameId = 0;
     let lastScrolled = window.scrollY > 100;
-
-    setScrolled(lastScrolled);
 
     const handleScroll = () => {
       if (frameId) return;
@@ -63,8 +63,8 @@ export default function Navigation() {
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         scrolled
           ? "bg-background shadow-sm"
-          : "bg-background/95 shadow-sm"
-      } backdrop-blur-xl border-b border-border text-foreground`}
+          : "bg-background/98 shadow-sm"
+      } border-b border-border text-foreground`}
     >
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between animate-slide-down">
         <Link
@@ -121,7 +121,7 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border animate-slide-down">
+        <div className="md:hidden bg-background border-b border-border animate-slide-down">
           <div className="px-6 py-4 flex flex-col gap-4">
             {navLinks.map((link) => (
               link.href.startsWith("/") ? (

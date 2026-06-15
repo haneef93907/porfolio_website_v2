@@ -25,7 +25,7 @@ export default function Blog() {
   const content = (
     <section
       id="blog"
-      className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-background transition-colors duration-300 overflow-hidden"
+      className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-background overflow-hidden"
     >
       <div className="max-w-7xl mx-auto">
         <div className="blog-header text-center mb-12">
@@ -119,7 +119,7 @@ export default function Blog() {
           </div>
         )}
 
-        <div className="mt-20 seo-gradient border border-border rounded-lg p-8 text-center animate-soft-reveal">
+        <div className="mt-20 seo-gradient border border-border rounded-lg p-8 text-center">
           <h3 className="text-2xl font-bold mb-2">Need a production-ready Flutter app?</h3>
           <p className="text-muted-foreground mb-6">
             Explore the articles, then reach out when you are ready to build,

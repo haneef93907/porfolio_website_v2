@@ -50,12 +50,19 @@
   }
 
   html {
+    background-color: hsl(var(--background));
     scroll-behavior: smooth;
   }
 
+  #root {
+    min-height: 100vh;
+    background-color: hsl(var(--background));
+  }
+
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+    min-height: 100vh;
     overflow-x: hidden;
   }
 
@@ -205,13 +212,11 @@
   @keyframes softReveal {
     from {
       opacity: 0;
-      transform: translateY(26px) scale(0.98);
-      filter: blur(6px);
+      transform: translateY(16px);
     }
     to {
       opacity: 1;
-      transform: translateY(0) scale(1);
-      filter: blur(0);
+      transform: translateY(0);
     }
   }
 
@@ -299,8 +304,6 @@
 
   .hero-visual {
     pointer-events: none;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 100%);
-    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 100%);
   }
 
   .animate-soft-reveal {
@@ -310,7 +313,6 @@
   .motion-card {
     position: relative;
     overflow: hidden;
-    transform: translateZ(0);
     transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
   }
 
@@ -320,7 +322,6 @@
     inset: -45%;
     background: conic-gradient(from 180deg, transparent, hsl(var(--accent) / 0.18), hsl(var(--primary) / 0.2), transparent 35%);
     opacity: 0;
-    animation: orbitGlow 8s linear infinite;
     transition: opacity 0.35s ease;
     pointer-events: none;
   }
