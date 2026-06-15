@@ -66,7 +66,7 @@ export default function Navigation() {
           : "bg-background/98 shadow-sm"
       } border-b border-border text-foreground`}
     >
-      <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between animate-slide-down">
+      <div className="max-w-[1200px] mx-auto px-5 sm:px-6 h-16 flex items-center justify-between animate-slide-down">
         <Link
           to="/"
           className="group relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-card text-foreground shadow-sm transition-all duration-300 animate-fade-in hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_28px_hsl(var(--primary)/0.28)]"
@@ -111,7 +111,7 @@ export default function Navigation() {
 
         {/* Mobile menu button */}
         <button
-          className="md:hidden text-foreground"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded border border-border bg-card text-foreground transition-colors hover:border-primary/50 hover:text-primary md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
