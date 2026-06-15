@@ -49,6 +49,10 @@
     --ring: 33 100% 50%;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground transition-colors duration-300;
     font-family: 'Inter', sans-serif;
@@ -78,6 +82,21 @@
   [data-theme="light"] .border-white\/5,
   [data-theme="light"] .border-white\/10 {
     border-color: hsl(var(--border));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 

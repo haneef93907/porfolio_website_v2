@@ -23,6 +23,7 @@ interface CardNode {
 export default function DigitFallClock() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<number>(0);
+  const visibleRef = useRef(true);
   const particlesRef = useRef<Particle[]>([]);
   const cardsRef = useRef<CardNode[]>([]);
 
@@ -277,6 +278,11 @@ export default function DigitFallClock() {
     }
 
     function draw(time: number) {
+      if (!visibleRef.current) {
+        frameRef.current = 0;
+        return;
+      }
+
       const width = canvasElement.clientWidth;
       const height = canvasElement.clientHeight;
       const cx = width * 0.5;
@@ -321,6 +327,8 @@ export default function DigitFallClock() {
 
       if (!prefersReducedMotion) {
         frameRef.current = requestAnimationFrame(draw);
+      } else {
+        frameRef.current = 0;
       }
     }
 
@@ -328,8 +336,27 @@ export default function DigitFallClock() {
     window.addEventListener("resize", resize);
     frameRef.current = requestAnimationFrame(draw);
 
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.isIntersecting;
+
+        if (entry.isIntersecting && !frameRef.current) {
+          frameRef.current = requestAnimationFrame(draw);
+        }
+
+        if (!entry.isIntersecting && frameRef.current) {
+          cancelAnimationFrame(frameRef.current);
+          frameRef.current = 0;
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(canvasElement);
+
     return () => {
       cancelAnimationFrame(frameRef.current);
+      observer.disconnect();
       window.removeEventListener("resize", resize);
     };
   }, []);

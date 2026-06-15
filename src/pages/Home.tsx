@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import Lenis from "lenis";
 import Navigation from "../sections/Navigation";
 import Hero from "../sections/Hero";
 import Projects from "../sections/Projects";
@@ -14,26 +12,6 @@ import SEO from "../components/SEO";
 import { SITE_URL } from "../config/site";
 
 export default function Home() {
-  useEffect(() => {
-    const lenis = new Lenis({
-      lerp: 0.14,
-      wheelMultiplier: 1,
-    });
-
-    let frameId = 0;
-    function raf(time: number) {
-      lenis.raf(time);
-      frameId = requestAnimationFrame(raf);
-    }
-
-    frameId = requestAnimationFrame(raf);
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      lenis.destroy();
-    };
-  }, []);
-
   return (
     <>
       <SEO

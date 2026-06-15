@@ -18,11 +18,29 @@ export default function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    let frameId = 0;
+    let lastScrolled = window.scrollY > 100;
+
+    setScrolled(lastScrolled);
+
     const handleScroll = () => {
-      setScrolled(window.scrollY > 100);
+      if (frameId) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        const nextScrolled = window.scrollY > 100;
+        if (nextScrolled !== lastScrolled) {
+          lastScrolled = nextScrolled;
+          setScrolled(nextScrolled);
+        }
+        frameId = 0;
+      });
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frameId) window.cancelAnimationFrame(frameId);
+    };
   }, []);
 
   const handleNavClick = (href: string) => {
