@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Linkedin,
-  Github,
   Phone,
   Mail,
   Send,
@@ -16,6 +15,7 @@ import { addContactLead } from "../lib/analytics";
 type SubmitStatus = "idle" | "sending" | "sent" | "error";
 
 export default function Contact({ content = defaultSiteContent.contact }: { content?: SiteContent["contact"] }) {
+  const resumeUrl = content.resumeUrl || defaultSiteContent.hero.resumeUrl;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -272,35 +272,41 @@ export default function Contact({ content = defaultSiteContent.contact }: { cont
         </form>
         </div>
 
-        {/* Social links */}
-        <div className="contact-animate flex items-center justify-center gap-6 mt-12">
+        <div className="contact-animate mt-12 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={`mailto:${content.email}`}
+            data-track="Contact CTA email"
+            className="inline-flex items-center justify-center gap-2 rounded bg-primary px-5 py-3 font-grotesk text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <Mail size={17} />
+            Email Me
+          </a>
+          <a
+            href={content.whatsappUrl}
+            data-track="Contact CTA WhatsApp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded border border-emerald-500/40 px-5 py-3 font-grotesk text-sm font-semibold uppercase tracking-wider text-emerald-500 transition-colors hover:border-emerald-400 hover:text-emerald-400"
+          >
+            <MessageCircle size={17} />
+            WhatsApp Me
+          </a>
           <a
             href={content.linkedinUrl}
-            data-track="LinkedIn footer contact"
+            data-track="Contact CTA LinkedIn"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-primary transition-colors"
-            aria-label="LinkedIn"
+            className="inline-flex items-center justify-center gap-2 rounded border border-border px-5 py-3 font-grotesk text-sm font-semibold uppercase tracking-wider text-foreground transition-colors hover:border-primary/50 hover:text-primary"
           >
-            <Linkedin size={24} />
+            <Linkedin size={17} />
+            LinkedIn
           </a>
           <a
-            href={content.githubUrl}
-            data-track="GitHub footer contact"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-primary transition-colors"
-            aria-label="GitHub"
+            href={resumeUrl}
+            data-track="Contact CTA resume"
+            className="inline-flex items-center justify-center gap-2 rounded border border-border px-5 py-3 font-grotesk text-sm font-semibold uppercase tracking-wider text-foreground transition-colors hover:border-primary/50 hover:text-primary"
           >
-            <Github size={24} />
-          </a>
-          <a
-            href={`tel:${content.phone.replace(/[^+\d]/g, "")}`}
-            data-track="Phone footer contact"
-            className="text-muted-foreground hover:text-primary transition-colors"
-            aria-label="Phone"
-          >
-            <Phone size={24} />
+            Download CV
           </a>
         </div>
       </div>

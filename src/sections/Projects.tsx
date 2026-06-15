@@ -29,18 +29,18 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
       </div>
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3 mb-4">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary break-words">
             {project.category}
           </span>
           <span className="text-xs text-muted-foreground shrink-0">{project.date}</span>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {safeArray(project.technologies).slice(0, 4).map((tech) => (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {safeArray(project.technologies).slice(0, 6).map((tech) => (
             <span
               key={tech}
-              className="font-mono text-[11px] text-accent bg-accent/10 px-2 py-1 rounded"
+              className="rounded border border-accent/20 bg-accent/10 px-2.5 py-1 font-mono text-[11px] text-accent"
             >
               {tech}
             </span>
@@ -65,15 +65,19 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
           )}
         </div>
 
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
-          {project.description}
+        <p className="mb-4 text-sm leading-relaxed text-muted-foreground line-clamp-3">
+          {project.overview || project.description}
         </p>
 
-        <p className="text-sm text-foreground mb-4 break-words">
-          <span className="text-muted-foreground">My role:</span> {project.role}
-        </p>
+        <div className="mb-4 rounded border border-border/80 bg-secondary/45 px-3 py-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">My role</p>
+          <p className="mt-1 text-sm font-medium text-foreground break-words">{project.role}</p>
+        </div>
 
-        <ul className="space-y-2 mb-5">
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          Key features
+        </div>
+        <ul className="mb-5 space-y-2">
           {safeArray(project.features).slice(0, 3).map((feature) => (
             <li key={feature} className="flex gap-2 text-sm text-muted-foreground">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />

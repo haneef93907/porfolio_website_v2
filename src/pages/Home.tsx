@@ -32,8 +32,8 @@ export default function Home() {
   return (
     <>
       <SEO
-        title="Muhammad Haneef | Flutter Developer for Production-Ready Mobile Apps"
-        description="Hire Muhammad Haneef, a Flutter Developer with 3.5+ years of experience building production-ready Android and iOS apps with Firebase, REST APIs, Stripe, real-time features, and store deployment."
+        title="Muhammad Haneef | Flutter Developer for Android & iOS Apps"
+        description="Hire Muhammad Haneef, a Flutter Developer with 3.5+ years of experience building production-ready Android and iOS apps using Flutter, Firebase, REST APIs, payments, subscriptions, maps, and real-time features."
         canonical={SITE_URL}
         schema={{
           "@context": "https://schema.org",

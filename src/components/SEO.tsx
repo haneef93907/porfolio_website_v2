@@ -55,6 +55,9 @@ export default function SEO({
     setMeta('meta[property="og:type"]', "content", "website");
     setMeta('meta[property="og:url"]', "content", canonical);
     setMeta('meta[name="twitter:card"]', "content", "summary_large_image");
+    setMeta('meta[name="twitter:title"]', "content", title);
+    setMeta('meta[name="twitter:description"]', "content", description);
+    setMeta('meta[name="twitter:image"]', "content", absoluteImage);
     setMeta('link[rel="canonical"]', "href", canonical);
 
     const id = "structured-data";

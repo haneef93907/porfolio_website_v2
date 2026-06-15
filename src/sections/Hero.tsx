@@ -1,6 +1,6 @@
 import DigitFallClock from "../components/DigitFallClock";
 import { defaultSiteContent, type SiteContent } from "../data/siteContent";
-import { ArrowDown, Download, MessageCircle, Send } from "lucide-react";
+import { ArrowDown, CalendarCheck, Download, Send } from "lucide-react";
 
 export default function Hero({ content = defaultSiteContent.hero }: { content?: SiteContent["hero"] }) {
   const handleScrollToWork = () => {
@@ -16,6 +16,7 @@ export default function Hero({ content = defaultSiteContent.hero }: { content?: 
       el.scrollIntoView({ behavior: "smooth" });
     }
   };
+  const consultationUrl = `${content.whatsappUrl}${content.whatsappUrl.includes("?") ? "&" : "?"}text=${encodeURIComponent("Hi Haneef, I want to book a free consultation for a Flutter app.")}`;
 
   return (
     <section
@@ -38,7 +39,7 @@ export default function Hero({ content = defaultSiteContent.hero }: { content?: 
             {content.description}
           </p>
 
-          <div className="hero-button flex flex-col sm:flex-row gap-3 mb-5">
+          <div className="hero-button grid gap-3 mb-5 sm:grid-cols-2">
             <button
               onClick={handleScrollToContact}
               data-track="Hero hire me"
@@ -53,28 +54,25 @@ export default function Hero({ content = defaultSiteContent.hero }: { content?: 
               className="inline-flex items-center justify-center gap-2 border border-border bg-card/80 text-foreground font-grotesk font-semibold text-sm uppercase tracking-wider px-6 py-3.5 rounded hover:border-primary/50 hover:text-primary transition-colors"
             >
               <ArrowDown size={16} />
-              View Projects
+              View My Apps
             </button>
-          </div>
-
-          <div className="hero-button mb-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-muted-foreground">
             <a
               href={content.resumeUrl}
               data-track="Hero resume download"
-              className="inline-flex items-center gap-2 transition-colors hover:text-primary"
+              className="inline-flex items-center justify-center gap-2 border border-border bg-card/80 text-foreground font-grotesk font-semibold text-sm uppercase tracking-wider px-6 py-3.5 rounded hover:border-primary/50 hover:text-primary transition-colors"
             >
-              <Download size={15} />
+              <Download size={16} />
               Download CV
             </a>
             <a
-              href={content.whatsappUrl}
-              data-track="Hero WhatsApp"
+              href={consultationUrl}
+              data-track="Hero free consultation"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-emerald-500 transition-colors hover:text-emerald-400"
+              className="inline-flex items-center justify-center gap-2 border border-primary/45 bg-primary/10 text-primary font-grotesk font-semibold text-sm uppercase tracking-wider px-6 py-3.5 rounded hover:bg-primary hover:text-primary-foreground transition-colors"
             >
-              <MessageCircle size={15} />
-              WhatsApp
+              <CalendarCheck size={16} />
+              Book a Free Consultation
             </a>
           </div>
 

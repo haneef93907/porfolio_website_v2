@@ -46,6 +46,7 @@ export interface SiteContent {
     whatsappUrl: string;
     linkedinUrl: string;
     githubUrl: string;
+    resumeUrl: string;
     bestFit: string;
     projectTypes: string[];
     budgetRanges: string[];
@@ -59,53 +60,53 @@ export interface SiteContent {
 export const defaultSiteContent: SiteContent = {
   hero: {
     label: "Muhammad Haneef - Senior Flutter Developer",
-    title: "Production-Ready Flutter Apps for Startups & Businesses",
+    title: "I build production-ready Flutter apps for startups, agencies, and businesses.",
     description:
-      "I design and develop scalable Android and iOS apps with Flutter, Firebase, REST APIs, Stripe payments, localization, real-time features, and app store deployment.",
+      "I'm Muhammad Haneef, a Flutter Developer with 3.5+ years of experience delivering scalable Android and iOS apps using Flutter, Firebase, REST APIs, real-time features, payments, and clean architecture.",
     resumeUrl: "/Muhammad-Haneef-CV.pdf",
     whatsappUrl: "https://wa.me/923030038699",
     stats: [
-      { value: "3.5+", label: "Years" },
-      { value: "40+", label: "Apps" },
-      { value: "Android/iOS", label: "Mobile" },
-      { value: "Flutter", label: "Firebase/API" },
+      { value: "3.5+", label: "Years Experience" },
+      { value: "40+", label: "Apps Delivered" },
+      { value: "Android & iOS", label: "Apps" },
+      { value: "Play Store / App Store", label: "Deployments" },
     ],
   },
   services: {
-    eyebrow: "Services",
-    title: "Mobile app development for serious product teams.",
+    eyebrow: "What I Can Build For You",
+    title: "Flutter app development for real product launches.",
     description:
-      "From MVPs to production apps, I help founders and businesses ship reliable Flutter products with the features users expect.",
+      "I help startups, agencies, and businesses turn app ideas into reliable Flutter products with clean architecture, backend integrations, payments, and store-ready releases.",
     items: [
       {
-        title: "Flutter App Development",
-        description: "Clean, scalable Flutter apps with production architecture and polished UI.",
+        title: "Flutter Mobile App Development",
+        description: "Production-ready Android and iOS apps built with Flutter, clean code, and scalable feature structure.",
         icon: "Code2",
       },
       {
-        title: "Android & iOS App Development",
-        description: "Cross-platform mobile apps built for consistent Android and iOS experiences.",
-        icon: "Smartphone",
-      },
-      {
-        title: "Flutter Firebase Apps",
-        description: "Auth, Firestore, Storage, push notifications, real-time updates, and cloud workflows.",
+        title: "Firebase App Development",
+        description: "Authentication, Firestore, Storage, Cloud Messaging, real-time updates, and Firebase-backed workflows.",
         icon: "Cloud",
       },
       {
-        title: "REST API Integration",
+        title: "MVP Development",
+        description: "Fast, founder-friendly MVP builds with focused scope, clear user flows, and launch-ready foundations.",
+        icon: "Rocket",
+      },
+      {
+        title: "API Integration",
         description: "Reliable API layers, error handling, pagination, auth tokens, and data sync.",
         icon: "ServerCog",
       },
       {
-        title: "Stripe / Payment Integration",
-        description: "Secure payment flows, subscriptions, checkout experiences, and donation apps.",
-        icon: "CreditCard",
+        title: "App Store & Play Store Deployment",
+        description: "Release builds, signing, store assets, review preparation, and launch support.",
+        icon: "Store",
       },
       {
-        title: "App Store & Play Store Deployment",
-        description: "Release builds, signing, store assets, review prep, and launch support.",
-        icon: "Store",
+        title: "Subscriptions & In-App Purchases",
+        description: "Secure subscription flows, in-app purchases, payment states, and revenue-focused app experiences.",
+        icon: "CreditCard",
       },
       {
         title: "Bug Fixing & App Optimization",
@@ -113,9 +114,9 @@ export const defaultSiteContent: SiteContent = {
         icon: "Bug",
       },
       {
-        title: "MVP Development",
-        description: "Founder-friendly MVP delivery with the right scope, fast iteration, and launch focus.",
-        icon: "Rocket",
+        title: "UI Implementation from Figma",
+        description: "Pixel-conscious Flutter UI implementation from Figma designs with responsive layouts and polished states.",
+        icon: "Smartphone",
       },
     ],
   },
@@ -211,29 +212,30 @@ export const defaultSiteContent: SiteContent = {
     ],
   },
   whyHireMe: {
-    eyebrow: "Why Hire Me",
-    title: "I build apps like products, not just screens.",
+    eyebrow: "Why Clients Choose Me",
+    title: "Reliable Flutter development from idea to store release.",
     description:
-      "You get a Flutter developer who understands launch pressure, product quality, communication, and the engineering details that keep mobile apps stable after release.",
+      "Clients work with me because I care about product quality, communication, clean architecture, and the details that keep apps stable after launch.",
     items: [
       { title: "Clean and scalable code", description: "Feature structure, state management, API layers, and maintainable patterns.", icon: "ShieldCheck" },
-      { title: "Production-ready development", description: "Release-minded builds with performance, error states, and edge cases handled.", icon: "CheckCircle2" },
+      { title: "Production-ready Flutter architecture", description: "Release-minded builds with performance, error states, and edge cases handled.", icon: "CheckCircle2" },
       { title: "Fast communication", description: "Clear updates, quick decisions, and practical delivery conversations.", icon: "Timer" },
-      { title: "End-to-end app delivery", description: "Screens, APIs, Firebase, payments, notifications, testing, and release prep.", icon: "Truck" },
+      { title: "40+ apps delivered", description: "Hands-on experience across MVPs, marketplaces, payments, internal tools, and production apps.", icon: "Truck" },
       { title: "Store deployment experience", description: "Android and iOS build signing, release assets, review prep, and launch support.", icon: "Wrench" },
       { title: "Long-term support after delivery", description: "Post-launch fixes, optimization, feature iteration, and product stability.", icon: "Headphones" },
     ],
   },
   contact: {
     eyebrow: "Contact",
-    title: "Have a Flutter app to build, fix, or launch?",
+    title: "Have an app idea? Let's build it.",
     description:
-      "Send the project details and I will respond with a clear next step. I am available for Flutter development, MVPs, Firebase apps, integrations, optimization, and store deployment.",
+      "Tell me what you want to build, fix, or launch. I will respond with a clear next step for your Flutter app.",
     email: "haneef93907@gmail.com",
     phone: "+92 303 0038699",
     whatsappUrl: "https://wa.me/923030038699",
     linkedinUrl: "https://www.linkedin.com/in/muhammad-haneef-flutterdev/",
     githubUrl: "https://github.com",
+    resumeUrl: "/Muhammad-Haneef-CV.pdf",
     bestFit: "Best fit: startups, founders, agencies, and businesses that need a reliable Flutter developer for real production apps.",
     projectTypes: ["MVP Development", "Flutter App Development", "Firebase App", "API / Stripe Integration", "Bug Fixing / Optimization", "Store Deployment"],
     budgetRanges: ["$1k - $3k", "$3k - $7k", "$7k - $15k", "$15k+", "Need estimate"],
