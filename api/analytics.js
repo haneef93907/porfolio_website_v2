@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { envValue } from "./env.js";
 
 const maxEvents = 5000;
 const maxLeads = 1000;
@@ -8,12 +9,12 @@ function json(response, status, payload) {
 }
 
 function supabaseConfig() {
-  const projectId = process.env.SUPABASE_PROJECT_ID;
+  const projectId = envValue("SUPABASE_PROJECT_ID");
   const derivedUrl = projectId ? `https://${projectId}.supabase.co` : "";
 
   return {
-    url: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || derivedUrl,
-    serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    url: envValue("SUPABASE_URL") || envValue("NEXT_PUBLIC_SUPABASE_URL") || derivedUrl,
+    serviceKey: envValue("SUPABASE_SERVICE_ROLE_KEY"),
   };
 }
 
@@ -22,9 +23,9 @@ function sha256(value) {
 }
 
 function verifyAdmin(email, password) {
-  const expectedEmail = process.env.VITE_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "haneef93907@gmail.com";
-  const expectedHash = process.env.VITE_ADMIN_PASSWORD_HASH || process.env.ADMIN_PASSWORD_HASH || "";
-  const expectedPassword = process.env.VITE_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "Jobs@123";
+  const expectedEmail = envValue("VITE_ADMIN_EMAIL") || envValue("ADMIN_EMAIL") || "haneef93907@gmail.com";
+  const expectedHash = envValue("VITE_ADMIN_PASSWORD_HASH") || envValue("ADMIN_PASSWORD_HASH") || "";
+  const expectedPassword = envValue("VITE_ADMIN_PASSWORD") || envValue("ADMIN_PASSWORD") || "Jobs@123";
 
   if (String(email || "").trim().toLowerCase() !== String(expectedEmail).trim().toLowerCase()) {
     return false;
