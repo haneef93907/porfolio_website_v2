@@ -8,70 +8,29 @@ import {
   Smartphone,
   Store,
 } from "lucide-react";
+import { defaultSiteContent, type SiteContent } from "../data/siteContent";
 
-const services = [
-  {
-    title: "Flutter App Development",
-    description: "Clean, scalable Flutter apps with production architecture and polished UI.",
-    icon: Code2,
-  },
-  {
-    title: "Android & iOS App Development",
-    description: "Cross-platform mobile apps built for consistent Android and iOS experiences.",
-    icon: Smartphone,
-  },
-  {
-    title: "Flutter Firebase Apps",
-    description: "Auth, Firestore, Storage, push notifications, real-time updates, and cloud workflows.",
-    icon: Cloud,
-  },
-  {
-    title: "REST API Integration",
-    description: "Reliable API layers, error handling, pagination, auth tokens, and data sync.",
-    icon: ServerCog,
-  },
-  {
-    title: "Stripe / Payment Integration",
-    description: "Secure payment flows, subscriptions, checkout experiences, and donation apps.",
-    icon: CreditCard,
-  },
-  {
-    title: "App Store & Play Store Deployment",
-    description: "Release builds, signing, store assets, review prep, and launch support.",
-    icon: Store,
-  },
-  {
-    title: "Bug Fixing & App Optimization",
-    description: "Performance tuning, crash fixes, UI cleanup, state bugs, and release hardening.",
-    icon: Bug,
-  },
-  {
-    title: "MVP Development",
-    description: "Founder-friendly MVP delivery with the right scope, fast iteration, and launch focus.",
-    icon: Rocket,
-  },
-];
+const serviceIcons = { Bug, Cloud, Code2, CreditCard, Rocket, ServerCog, Smartphone, Store };
 
-export default function Services() {
+export default function Services({ content = defaultSiteContent.services }: { content?: SiteContent["services"] }) {
   return (
     <section id="services" className="bg-background py-24 sm:py-32">
       <div className="mx-auto max-w-[1200px] px-6">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
-          Services
+          {content.eyebrow}
         </p>
         <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12">
           <div>
             <h2 className="font-grotesk text-3xl font-bold text-foreground sm:text-4xl lg:text-5xl">
-              Mobile app development for serious product teams.
+              {content.title}
             </h2>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              From MVPs to production apps, I help founders and businesses ship
-              reliable Flutter products with the features users expect.
+              {content.description}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {services.map((service) => {
-              const Icon = service.icon;
+            {content.items.map((service) => {
+              const Icon = serviceIcons[service.icon as keyof typeof serviceIcons] || Code2;
               return (
                 <article
                   key={service.title}

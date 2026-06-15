@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
-const allowedKeys = new Set(["site", "projects", "blogs"]);
+const maxEvents = 5000;
+const maxLeads = 1000;
 
 function json(response, status, payload) {
   response.status(status).json(payload);
@@ -62,44 +63,69 @@ async function supabaseRequest(path, options = {}) {
   return response.json();
 }
 
+async function readRow(key, fallback) {
+  const rows = await supabaseRequest(`portfolio_content?key=eq.${encodeURIComponent(key)}&select=data&limit=1`);
+  return rows?.[0]?.data || fallback;
+}
+
+async function writeRow(key, data) {
+  const rows = await supabaseRequest("portfolio_content?on_conflict=key", {
+    method: "POST",
+    body: JSON.stringify({ key, data, updated_at: new Date().toISOString() }),
+  });
+  return rows?.[0]?.data || data;
+}
+
+async function appendRow(key, item, limit) {
+  const current = await readRow(key, []);
+  const next = [item, ...(Array.isArray(current) ? current : [])].slice(0, limit);
+  return writeRow(key, next);
+}
+
 export default async function handler(request, response) {
   response.setHeader("Cache-Control", "no-store");
 
-  const key = request.query.key;
-  if (!allowedKeys.has(key)) {
-    return json(response, 400, { error: "Invalid content key." });
+  if (request.method !== "POST") {
+    response.setHeader("Allow", "POST");
+    return json(response, 405, { error: "Method not allowed." });
   }
 
-  if (request.method === "GET") {
-    try {
-      const rows = await supabaseRequest(`portfolio_content?key=eq.${encodeURIComponent(key)}&select=data,updated_at&limit=1`);
-      return json(response, 200, { data: rows?.[0]?.data || null, updatedAt: rows?.[0]?.updated_at || null });
-    } catch (error) {
-      return json(response, 503, { data: null, error: error instanceof Error ? error.message : "Content backend unavailable." });
+  const { action, email, password, event, lead, id, updates } = request.body || {};
+
+  try {
+    if (action === "track") {
+      await appendRow("analytics_events", event, maxEvents);
+      return json(response, 200, { ok: true });
     }
-  }
 
-  if (request.method === "PUT") {
-    const { email, password, data } = request.body || {};
+    if (action === "lead") {
+      await appendRow("contact_leads", lead, maxLeads);
+      return json(response, 200, { ok: true });
+    }
+
     if (!verifyAdmin(email, password)) {
       return json(response, 401, { error: "Unauthorized." });
     }
 
-    try {
-      const rows = await supabaseRequest("portfolio_content?on_conflict=key", {
-        method: "POST",
-        body: JSON.stringify({
-          key,
-          data,
-          updated_at: new Date().toISOString(),
-        }),
-      });
-      return json(response, 200, { data: rows?.[0]?.data || data, updatedAt: rows?.[0]?.updated_at || null });
-    } catch (error) {
-      return json(response, 503, { error: error instanceof Error ? error.message : "Content backend unavailable." });
+    if (action === "read") {
+      const [events, leads] = await Promise.all([
+        readRow("analytics_events", []),
+        readRow("contact_leads", []),
+      ]);
+      return json(response, 200, { events, leads });
     }
-  }
 
-  response.setHeader("Allow", "GET, PUT");
-  return json(response, 405, { error: "Method not allowed." });
+    if (action === "updateLead") {
+      const leads = await readRow("contact_leads", []);
+      const next = Array.isArray(leads)
+        ? leads.map((item) => (item.id === id ? { ...item, ...updates } : item))
+        : [];
+      const saved = await writeRow("contact_leads", next);
+      return json(response, 200, { leads: saved });
+    }
+
+    return json(response, 400, { error: "Invalid analytics action." });
+  } catch (error) {
+    return json(response, 503, { error: error instanceof Error ? error.message : "Analytics backend unavailable." });
+  }
 }

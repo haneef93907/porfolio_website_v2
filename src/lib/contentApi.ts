@@ -11,7 +11,9 @@ export interface ContentResult<T> {
   error?: string;
 }
 
-export async function loadContent<T>(key: "projects" | "blogs", fallback: T): Promise<ContentResult<T>> {
+export type ContentKey = "site" | "projects" | "blogs";
+
+export async function loadContent<T>(key: ContentKey, fallback: T): Promise<ContentResult<T>> {
   try {
     const response = await fetch(`/api/content?key=${key}`, { cache: "no-store" });
     const payload = await response.json();
@@ -38,7 +40,7 @@ export async function loadContent<T>(key: "projects" | "blogs", fallback: T): Pr
 }
 
 export async function saveContent<T>(
-  key: "projects" | "blogs",
+  key: ContentKey,
   data: T,
   credentials: AdminWriteCredentials
 ): Promise<ContentResult<T>> {
@@ -94,7 +96,7 @@ export async function uploadImage(
   }
 }
 
-function readLocal<T>(key: "projects" | "blogs") {
+function readLocal<T>(key: ContentKey) {
   const raw = safeGetStorage("local", localKey(key));
   if (!raw) return null;
   try {
@@ -104,6 +106,8 @@ function readLocal<T>(key: "projects" | "blogs") {
   }
 }
 
-function localKey(key: "projects" | "blogs") {
-  return key === "projects" ? "portfolio-projects-v3" : "portfolio-blogs-v2";
+function localKey(key: ContentKey) {
+  if (key === "projects") return "portfolio-projects-v3";
+  if (key === "blogs") return "portfolio-blogs-v2";
+  return "portfolio-site-v1";
 }

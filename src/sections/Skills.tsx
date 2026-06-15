@@ -1,145 +1,7 @@
+import { defaultSiteContent, type SiteContent } from "../data/siteContent";
 import { safeArray } from "../lib/utils";
 
-interface SkillCategory {
-  title: string;
-  items: string[];
-}
-
-const skills: SkillCategory[] = [
-  {
-    title: "Core Flutter Expertise",
-    items: [
-      "Flutter 4.x / 5.x",
-      "Dart",
-      "Object-Oriented Programming",
-      "Cross-Platform Development",
-      "Android, iOS & Web Apps",
-      "Scalable App Architecture",
-      "Release Management",
-      "Production-Grade Delivery",
-      "Git Version Control",
-    ],
-  },
-  {
-    title: "Architecture & Design Principles",
-    items: [
-      "Clean Architecture",
-      "SOLID Principles",
-      "Design Patterns",
-      "Modular Architecture",
-      "MVC",
-      "MVVM",
-      "Dependency Injection",
-      "Separation of Concerns",
-    ],
-  },
-  {
-    title: "State Management",
-    items: ["BLoC", "Riverpod", "Provider", "GetX"],
-  },
-  {
-    title: "Backend, APIs & Security",
-    items: [
-      "REST APIs",
-      "GraphQL",
-      "Python FastAPI",
-      "Node.js Express",
-      "OAuth 2",
-      "JWT Authentication",
-      "Token-Based Security",
-    ],
-  },
-  {
-    title: "Databases",
-    items: [
-      "Firebase Firestore",
-      "MongoDB",
-      "SQLite",
-      "Hive",
-      "Shared Preferences",
-      "Supabase",
-    ],
-  },
-  {
-    title: "Testing & Quality Assurance",
-    items: [
-      "Unit Testing",
-      "Widget Testing",
-      "Integration Testing",
-      "Mockito",
-      "Debugging Strategies",
-    ],
-  },
-  {
-    title: "Performance Optimization",
-    items: [
-      "App Size Optimization",
-      "Lazy Loading",
-      "Memory Optimization",
-      "UI Rendering Optimization",
-      "Flutter DevTools Profiling",
-    ],
-  },
-  {
-    title: "Cloud & DevOps",
-    items: [
-      "Firebase",
-      "AWS",
-      "Azure",
-      "DigitalOcean",
-      "Codemagic",
-      "Bitrise",
-      "Fastlane",
-      "GitHub Actions",
-      "CI/CD Pipelines",
-      "Automated Build Deployment",
-    ],
-  },
-  {
-    title: "Tools & Platforms",
-    items: [
-      "Git",
-      "GitHub",
-      "Bitbucket",
-      "Visual Studio Code",
-      "Android Studio",
-      "Xcode",
-    ],
-  },
-  {
-    title: "Notifications & Real-Time Messaging",
-    items: [
-      "Firebase Cloud Messaging",
-      "OneSignal",
-      "WebSocket",
-      "Push Notification Systems",
-    ],
-  },
-  {
-    title: "Monitoring & Analytics",
-    items: [
-      "Crashlytics",
-      "Crash Reporting",
-      "Firebase Analytics",
-      "Firebase Services",
-    ],
-  },
-  {
-    title: "Agile & Collaboration",
-    items: [
-      "Agile / Scrum",
-      "Sprint Planning",
-      "Kanban",
-      "Jira",
-      "Trello",
-      "Code Reviews",
-      "Technical Documentation",
-      "Team Collaboration",
-    ],
-  },
-];
-
-function SkillItem({ skill }: { skill: SkillCategory }) {
+function SkillItem({ skill }: { skill: SiteContent["skills"]["items"][number] }) {
   return (
     <div className="mb-10 last:mb-0">
       <h3
@@ -161,7 +23,7 @@ function SkillItem({ skill }: { skill: SkillCategory }) {
   );
 }
 
-export default function Skills() {
+export default function Skills({ content = defaultSiteContent.skills }: { content?: SiteContent["skills"] }) {
   return (
     <section
       id="skills"
@@ -172,23 +34,24 @@ export default function Skills() {
           {/* Left sticky heading */}
           <div className="lg:sticky lg:top-32 lg:self-start">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
-              SKILLS
+              {content.eyebrow}
             </p>
             <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
-              Technical
-              <br />
-              Arsenal
+              {content.title.split("\n").map((line) => (
+                <span key={line}>
+                  {line}
+                  <br />
+                </span>
+              ))}
             </h2>
             <p className="text-muted-foreground text-base leading-relaxed">
-              What I bring to the table — a CV-aligned skill set built around
-              production-grade Flutter apps, clean architecture, API
-              integrations, performance, deployment, and long-term app quality.
+              {content.description}
             </p>
           </div>
 
           {/* Right scrolling skills */}
           <div>
-            {safeArray(skills).map((skill) => (
+            {safeArray(content.items).map((skill) => (
               <SkillItem key={skill.title} skill={skill} />
             ))}
           </div>

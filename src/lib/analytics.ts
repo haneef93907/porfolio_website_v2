@@ -1,4 +1,5 @@
 import { safeGetStorage, safeSetStorage } from "./safeStorage";
+import type { AdminWriteCredentials } from "./contentApi";
 
 const EVENTS_KEY = "portfolio-analytics-events-v1";
 const VISITOR_KEY = "portfolio-visitor-id";
@@ -240,6 +241,7 @@ export function trackEvent(type: AnalyticsEventType, name: string, meta?: Analyt
   const events = readJson<AnalyticsEvent[]>(EVENTS_KEY, []);
   events.push(event);
   writeJson(EVENTS_KEY, events.slice(-1000));
+  void postAnalytics({ action: "track", event });
 }
 
 export function getAnalyticsEvents() {
@@ -257,6 +259,7 @@ export function addContactLead(lead: Omit<ContactLead, "id" | "createdAt" | "sta
     likelyVisitor: classifyVisitor({ email: lead.email, source: lead.utmSource, projectType: lead.projectType }),
   };
   writeJson(LEADS_KEY, [newLead, ...leads].slice(0, 500));
+  void postAnalytics({ action: "lead", lead: newLead });
   trackEvent("contact_submit", "Contact form submitted", {
     projectType: lead.projectType,
     budget: lead.budget,
@@ -273,6 +276,42 @@ export function updateContactLead(id: string, updates: Partial<ContactLead>) {
   const updated = getContactLeads().map((lead) => (lead.id === id ? { ...lead, ...updates } : lead));
   writeJson(LEADS_KEY, updated);
   return updated;
+}
+
+export async function loadBackendAnalytics(credentials: AdminWriteCredentials) {
+  const response = await fetch("/api/analytics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "read", ...credentials }),
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error || "Analytics backend unavailable.");
+  }
+  const events = Array.isArray(payload.events) ? payload.events as AnalyticsEvent[] : [];
+  const leads = Array.isArray(payload.leads) ? payload.leads as ContactLead[] : [];
+  writeJson(EVENTS_KEY, events);
+  writeJson(LEADS_KEY, leads);
+  return { events, leads };
+}
+
+export async function updateBackendContactLead(
+  id: string,
+  updates: Partial<ContactLead>,
+  credentials: AdminWriteCredentials
+) {
+  const response = await fetch("/api/analytics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "updateLead", id, updates, ...credentials }),
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error || "Lead update failed.");
+  }
+  const leads = Array.isArray(payload.leads) ? payload.leads as ContactLead[] : getContactLeads();
+  writeJson(LEADS_KEY, leads);
+  return leads;
 }
 
 export function classifyVisitor(input?: { email?: string; source?: string; projectType?: string }): VisitorKind {
@@ -295,8 +334,8 @@ export function classifyVisitor(input?: { email?: string; source?: string; proje
   return "Random visitor";
 }
 
-export function summarizeAnalytics() {
-  const events = getAnalyticsEvents();
+export function summarizeAnalytics(inputEvents = getAnalyticsEvents()) {
+  const events = inputEvents;
   const visitorIds = new Set(events.map((event) => event.visitorId));
   const today = new Date().toISOString().slice(0, 10);
   const thisWeek = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -337,6 +376,16 @@ export function summarizeAnalytics() {
     avgDuration,
     bounceSessions: Array.from(sessions.values()).filter((sessionEvents) => sessionEvents.length <= 1).length,
   };
+}
+
+function postAnalytics(payload: Record<string, unknown>) {
+  if (typeof window === "undefined") return Promise.resolve();
+  return fetch("/api/analytics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => undefined);
 }
 
 export function exportCsv(filename: string, rows: Array<Record<string, unknown>>) {

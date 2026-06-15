@@ -17,14 +17,18 @@ import {
   updateProject,
   type Project,
 } from "../data/projects";
+import { defaultSiteContent, type SiteContent } from "../data/siteContent";
 import { loadContent, saveContent, uploadImage, type AdminWriteCredentials } from "../lib/contentApi";
 import { safeRemoveStorage } from "../lib/safeStorage";
 import {
   exportCsv,
+  loadBackendAnalytics,
   getAnalyticsEvents,
   getContactLeads,
   summarizeAnalytics,
+  updateBackendContactLead,
   updateContactLead,
+  type AnalyticsEvent,
   type ContactLead,
 } from "../lib/analytics";
 import {
@@ -188,14 +192,15 @@ export default function Admin() {
   const [projects, setProjects] = useState<Project[]>(() => getProjects());
   const [blogs, setBlogs] = useState<BlogPost[]>(() => getBlogs());
   const [leads, setLeads] = useState<ContactLead[]>(() => getContactLeads());
+  const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEvent[]>(() => getAnalyticsEvents());
   const [backendStatus, setBackendStatus] = useState("Checking content backend...");
   const [analyticsVersion, setAnalyticsVersion] = useState(0);
   const [projectForm, setProjectForm] = useState<ProjectForm | null>(null);
   const [blogForm, setBlogForm] = useState<BlogForm | null>(null);
   const analytics = useMemo(() => {
     void analyticsVersion;
-    return summarizeAnalytics();
-  }, [analyticsVersion]);
+    return summarizeAnalytics(analyticsEvents);
+  }, [analyticsEvents, analyticsVersion]);
 
   const stats = useMemo(
     () => [
@@ -237,15 +242,19 @@ export default function Admin() {
     };
 
     void Promise.all([
+      loadContent<SiteContent>("site", defaultSiteContent),
       loadContent<Project[]>("projects", getProjects()),
       loadContent<BlogPost[]>("blogs", getBlogs()),
-    ]).then(async ([projectResult, blogResult]) => {
+    ]).then(async ([siteResult, projectResult, blogResult]) => {
       if (!active) return;
       setProjects(projectResult.data);
       setBlogs(blogResult.data);
-      const backendOk = projectResult.source === "backend" && blogResult.source === "backend";
+      const backendOk = siteResult.source === "backend" && projectResult.source === "backend" && blogResult.source === "backend";
       if (!backendOk) {
-        const [seededProjects, seededBlogs] = await Promise.all([
+        const [seededSite, seededProjects, seededBlogs] = await Promise.all([
+          siteResult.source === "backend"
+            ? Promise.resolve(siteResult)
+            : saveContent("site", siteResult.data, adminCredentials),
           projectResult.source === "backend"
             ? Promise.resolve(projectResult)
             : saveContent("projects", projectResult.data, adminCredentials),
@@ -254,17 +263,25 @@ export default function Admin() {
             : saveContent("blogs", blogResult.data, adminCredentials),
         ]);
         if (!active) return;
-        const seededOk = seededProjects.source === "backend" && seededBlogs.source === "backend";
+        const seededOk = seededSite.source === "backend" && seededProjects.source === "backend" && seededBlogs.source === "backend";
         setBackendStatus(
           seededOk
-            ? "Connected to backend. Existing content has been seeded to Supabase."
-            : `Local fallback only. Configure Supabase env vars/table/bucket on Vercel. ${seededProjects.error || seededBlogs.error || ""}`
+            ? "Connected to backend. Existing site, projects, and blog content has been seeded to Supabase."
+            : `Local fallback only. Configure Supabase env vars/table/bucket on Vercel. ${seededSite.error || seededProjects.error || seededBlogs.error || ""}`
         );
         return;
       }
       setBackendStatus(
         "Connected to backend. Changes will be visible to everyone."
       );
+    });
+
+    void loadBackendAnalytics(adminCredentials).then((result) => {
+      if (!active) return;
+      setAnalyticsEvents(result.events);
+      setLeads(result.leads);
+    }).catch(() => {
+      // Keep local analytics visible if the backend is unavailable.
     });
 
     return () => {
@@ -474,13 +491,26 @@ export default function Admin() {
         )}
 
         {tab === "analytics" && (
-          <AnalyticsPanel analytics={analytics} onRefresh={() => setAnalyticsVersion((value) => value + 1)} />
+          <AnalyticsPanel
+            analytics={analytics}
+            onRefresh={() => {
+              void loadBackendAnalytics(credentials()).then((result) => {
+                setAnalyticsEvents(result.events);
+                setLeads(result.leads);
+                setAnalyticsVersion((value) => value + 1);
+              }).catch(() => setAnalyticsVersion((value) => value + 1));
+            }}
+          />
         )}
 
         {tab === "leads" && (
           <LeadsPanel
             leads={leads}
-            onChange={(id, updates) => setLeads(updateContactLead(id, updates))}
+            onChange={(id, updates) => {
+              const local = updateContactLead(id, updates);
+              setLeads(local);
+              void updateBackendContactLead(id, updates, credentials()).then(setLeads).catch(() => undefined);
+            }}
           />
         )}
 
@@ -597,7 +627,7 @@ export default function Admin() {
           </section>
         )}
 
-        {tab === "reports" && <ReportsPanel leads={leads} />}
+        {tab === "reports" && <ReportsPanel leads={leads} events={analyticsEvents} />}
 
         {tab === "security" && <SecurityPanel />}
       </div>
@@ -774,8 +804,7 @@ function LeadsPanel({
   );
 }
 
-function ReportsPanel({ leads }: { leads: ContactLead[] }) {
-  const events = getAnalyticsEvents();
+function ReportsPanel({ leads, events }: { leads: ContactLead[]; events: AnalyticsEvent[] }) {
   return (
     <section className="space-y-5">
       <h2 className="font-grotesk text-2xl font-bold">Reports</h2>

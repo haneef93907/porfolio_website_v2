@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router";
+import { defaultSiteContent, type SiteContent } from "../data/siteContent";
 
-export default function Footer() {
+export default function Footer({ content = defaultSiteContent.footer }: { content?: SiteContent["footer"] }) {
   const navigate = useNavigate();
   const clickCount = useRef(0);
 
@@ -23,13 +24,13 @@ export default function Footer() {
             className="text-left text-sm text-muted-foreground"
             aria-label="Copyright"
           >
-            &copy; {new Date().getFullYear()} Muhammad Haneef. All rights
+            &copy; {new Date().getFullYear()} {content.owner}. All rights
             reserved.
           </button>
 
           <div className="flex items-center gap-4">
             <span className="text-xs text-muted-foreground/70">
-              Designed &amp; Built with Flutter Precision
+              {content.tagline}
             </span>
           </div>
         </div>

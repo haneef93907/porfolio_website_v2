@@ -1,7 +1,8 @@
 import DigitFallClock from "../components/DigitFallClock";
+import { defaultSiteContent, type SiteContent } from "../data/siteContent";
 import { ArrowDown, Download, MessageCircle, Send } from "lucide-react";
 
-export default function Hero() {
+export default function Hero({ content = defaultSiteContent.hero }: { content?: SiteContent["hero"] }) {
   const handleScrollToWork = () => {
     const el = document.querySelector("#work");
     if (el) {
@@ -26,17 +27,15 @@ export default function Hero() {
         <div className="max-w-3xl">
           <p className="hero-label inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-primary mb-5">
             <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_24px_hsl(var(--primary))]" />
-            Muhammad Haneef - Senior Flutter Developer
+            {content.label}
           </p>
 
           <h1 className="hero-name font-grotesk font-bold text-4xl sm:text-5xl xl:text-6xl dark:text-foreground text-black leading-[1.04] mb-5 max-w-3xl">
-            Production-Ready Flutter Apps for Startups & Businesses
+            {content.title}
           </h1>
 
           <p className="hero-description text-base sm:text-lg dark:text-muted-foreground text-gray-600 leading-relaxed max-w-2xl mb-8">
-            I design and develop scalable Android and iOS apps with Flutter,
-            Firebase, REST APIs, Stripe payments, localization, real-time
-            features, and app store deployment.
+            {content.description}
           </p>
 
           <div className="hero-button flex flex-col sm:flex-row gap-3 mb-5">
@@ -60,7 +59,7 @@ export default function Hero() {
 
           <div className="hero-button mb-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-muted-foreground">
             <a
-              href="/Muhammad-Haneef-CV.pdf"
+              href={content.resumeUrl}
               data-track="Hero resume download"
               className="inline-flex items-center gap-2 transition-colors hover:text-primary"
             >
@@ -68,7 +67,7 @@ export default function Hero() {
               Download CV
             </a>
             <a
-              href="https://wa.me/923030038699"
+              href={content.whatsappUrl}
               data-track="Hero WhatsApp"
               target="_blank"
               rel="noopener noreferrer"
@@ -80,12 +79,7 @@ export default function Hero() {
           </div>
 
           <div className="hero-button grid grid-cols-2 gap-x-6 gap-y-4 border-y border-border/70 py-5 sm:grid-cols-4">
-            {[
-              ["3.5+", "Years"],
-              ["40+", "Apps"],
-              ["Android/iOS", "Mobile"],
-              ["Flutter", "Firebase/API"],
-            ].map(([value, label]) => (
+            {content.stats.map(({ value, label }) => (
               <div
                 key={label}
                 className="min-w-0"

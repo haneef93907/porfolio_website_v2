@@ -1,46 +1,7 @@
+import { defaultSiteContent, type SiteContent } from "../data/siteContent";
 import { safeArray } from "../lib/utils";
 
-interface ExperienceEntry {
-  company: string;
-  role: string;
-  period: string;
-  location: string;
-  highlights: string[];
-  align: "left" | "right";
-}
-
-const experiences: ExperienceEntry[] = [
-  {
-    company: "Emblem Technology",
-    role: "Flutter Developer / Software Engineer",
-    period: "Jan 2023 - Present",
-    location: "Lahore, Pakistan",
-    align: "right",
-    highlights: [
-      "Owned end-to-end delivery of 5+ client products serving 20K+ users",
-      "Architected backend services using Node.js, FastAPI, and Firebase",
-      "Established CI/CD pipelines reducing release cycles by 30%",
-      "Led and mentored a cross-functional team of 20+ engineers",
-      "Designed offline-first architectures achieving near 100% availability",
-      "Reduced cloud infrastructure costs by 98%",
-    ],
-  },
-  {
-    company: "DigitalUx",
-    role: "Flutter Developer",
-    period: "Jun 2022 - Jan 2023",
-    location: "Lahore, Pakistan",
-    align: "left",
-    highlights: [
-      "Delivered 4+ production-grade Flutter apps published on Play Store and App Store",
-      "Implemented real-time features: live chat, push notifications, in-app purchases, NFC payments",
-      "Developed internal Jira-style ticket management system",
-      "Collaborated with clients, PMs, and designers for scalable mobile UI/UX",
-    ],
-  },
-];
-
-function ExperienceCard({ entry }: { entry: ExperienceEntry }) {
+function ExperienceCard({ entry }: { entry: SiteContent["experience"]["items"][number] }) {
   return (
     <div
       className={`relative bg-card border border-border border-l-[3px] border-l-primary p-6 sm:p-8 rounded shadow-lg ${
@@ -72,7 +33,7 @@ function ExperienceCard({ entry }: { entry: ExperienceEntry }) {
   );
 }
 
-export default function Experience() {
+export default function Experience({ content = defaultSiteContent.experience }: { content?: SiteContent["experience"] }) {
   return (
     <section
       id="experience"
@@ -80,14 +41,14 @@ export default function Experience() {
     >
       <div className="max-w-[1000px] mx-auto px-6">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4 text-center">
-          EXPERIENCE
+          {content.eyebrow}
         </p>
         <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-12 lg:mb-16 text-center">
-          Work History
+          {content.title}
         </h2>
 
         <div className="relative space-y-8 lg:space-y-12">
-          {safeArray(experiences).map((entry) => (
+          {safeArray(content.items).map((entry) => (
             <ExperienceCard key={entry.company} entry={entry} />
           ))}
         </div>

@@ -10,16 +10,17 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import { defaultSiteContent, type SiteContent } from "../data/siteContent";
 import { addContactLead } from "../lib/analytics";
 
 type SubmitStatus = "idle" | "sending" | "sent" | "error";
 
-export default function Contact() {
+export default function Contact({ content = defaultSiteContent.contact }: { content?: SiteContent["contact"] }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    projectType: "MVP Development",
-    budget: "$1k - $3k",
+    projectType: content.projectTypes[0] || "MVP Development",
+    budget: content.budgetRanges[0] || "$1k - $3k",
     message: "",
   });
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
@@ -51,7 +52,7 @@ export default function Contact() {
     });
 
     try {
-      const response = await fetch("https://formsubmit.co/ajax/haneef93907@gmail.com", {
+      const response = await fetch(`https://formsubmit.co/ajax/${content.email}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,15 +69,15 @@ export default function Contact() {
       setFormData({
         name: "",
         email: "",
-        projectType: "MVP Development",
-        budget: "$1k - $3k",
+        projectType: content.projectTypes[0] || "MVP Development",
+        budget: content.budgetRanges[0] || "$1k - $3k",
         message: "",
       });
       setTimeout(() => setSubmitStatus("idle"), 4500);
     } catch {
       const subject = `Flutter Project Inquiry from ${name}`;
       const body = `Name: ${name}\nEmail: ${email}\nProject Type: ${projectType}\nBudget Range: ${budget}\n\nMessage:\n${message}`;
-      window.location.href = `mailto:haneef93907@gmail.com?subject=${encodeURIComponent(
+      window.location.href = `mailto:${content.email}?subject=${encodeURIComponent(
         subject
       )}&body=${encodeURIComponent(body)}`;
       setSubmitStatus("error");
@@ -110,16 +111,14 @@ export default function Contact() {
       <div className="max-w-[1100px] mx-auto px-6">
         <div className="contact-animate text-center mb-12">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
-            Contact
+            {content.eyebrow}
           </p>
           <h2 className="font-grotesk font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-6">
-            Have a Flutter app to build, fix, or launch?
+            {content.title}
           </h2>
 
           <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-            Send the project details and I will respond with a clear next step.
-            I am available for Flutter development, MVPs, Firebase apps,
-            integrations, optimization, and store deployment.
+            {content.description}
           </p>
         </div>
 
@@ -130,23 +129,23 @@ export default function Contact() {
             </h3>
             <div className="mt-6 space-y-4">
               <a
-                href="mailto:haneef93907@gmail.com"
+                href={`mailto:${content.email}`}
                 data-track="Email link"
                 className="flex items-center gap-3 text-muted-foreground hover:text-primary"
               >
                 <Mail size={18} />
-                haneef93907@gmail.com
+                {content.email}
               </a>
               <a
-                href="tel:+923030038699"
+                href={`tel:${content.phone.replace(/[^+\d]/g, "")}`}
                 data-track="Phone link"
                 className="flex items-center gap-3 text-muted-foreground hover:text-primary"
               >
                 <Phone size={18} />
-                +92 303 0038699
+                {content.phone}
               </a>
               <a
-                href="https://wa.me/923030038699"
+                href={content.whatsappUrl}
                 data-track="WhatsApp direct link"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -156,7 +155,7 @@ export default function Contact() {
                 WhatsApp Me
               </a>
               <a
-                href="https://www.linkedin.com/in/muhammad-haneef-flutterdev/"
+                href={content.linkedinUrl}
                 data-track="LinkedIn direct link"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -167,8 +166,7 @@ export default function Contact() {
               </a>
             </div>
             <div className="mt-8 rounded bg-secondary/70 p-4 text-sm leading-relaxed text-muted-foreground">
-              Best fit: startups, founders, agencies, and businesses that need
-              a reliable Flutter developer for real production apps.
+              {content.bestFit}
             </div>
           </aside>
 
@@ -209,12 +207,9 @@ export default function Contact() {
                 onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
                 className="w-full bg-background border border-border rounded px-4 py-3 text-foreground focus:border-primary focus:outline-none transition-colors"
               >
-                <option>MVP Development</option>
-                <option>Flutter App Development</option>
-                <option>Firebase App</option>
-                <option>API / Stripe Integration</option>
-                <option>Bug Fixing / Optimization</option>
-                <option>Store Deployment</option>
+                {content.projectTypes.map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -224,11 +219,9 @@ export default function Contact() {
                 onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
                 className="w-full bg-background border border-border rounded px-4 py-3 text-foreground focus:border-primary focus:outline-none transition-colors"
               >
-                <option>$1k - $3k</option>
-                <option>$3k - $7k</option>
-                <option>$7k - $15k</option>
-                <option>$15k+</option>
-                <option>Need estimate</option>
+                {content.budgetRanges.map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -282,7 +275,7 @@ export default function Contact() {
         {/* Social links */}
         <div className="contact-animate flex items-center justify-center gap-6 mt-12">
           <a
-            href="https://www.linkedin.com/in/muhammad-haneef-flutterdev/"
+            href={content.linkedinUrl}
             data-track="LinkedIn footer contact"
             target="_blank"
             rel="noopener noreferrer"
@@ -292,7 +285,7 @@ export default function Contact() {
             <Linkedin size={24} />
           </a>
           <a
-            href="https://github.com"
+            href={content.githubUrl}
             data-track="GitHub footer contact"
             target="_blank"
             rel="noopener noreferrer"
@@ -302,7 +295,7 @@ export default function Contact() {
             <Github size={24} />
           </a>
           <a
-            href="tel:+923030038699"
+            href={`tel:${content.phone.replace(/[^+\d]/g, "")}`}
             data-track="Phone footer contact"
             className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Phone"
