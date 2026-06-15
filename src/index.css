@@ -229,6 +229,20 @@
     }
   }
 
+  @keyframes mobileHeroSweep {
+    from {
+      transform: translateY(-18%);
+      opacity: 0.12;
+    }
+    50% {
+      opacity: 0.22;
+    }
+    to {
+      transform: translateY(18%);
+      opacity: 0.12;
+    }
+  }
+
   /* Animation Utility Classes */
   .animate-fade-in {
     animation: fadeIn 0.6s ease-out;
@@ -308,6 +322,26 @@
     mask-image: linear-gradient(to right, transparent 0%, black 8%, black 100%);
   }
 
+  .hero-mobile-texture {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, transparent 0 18%, hsl(var(--accent) / 0.08) 18% 18.35%, transparent 18.35% 100%),
+      linear-gradient(180deg, hsl(var(--foreground) / 0.06) 0 1px, transparent 1px 56px),
+      radial-gradient(ellipse at 76% 18%, hsl(var(--accent) / 0.16), transparent 34%),
+      radial-gradient(ellipse at 86% 62%, hsl(var(--primary) / 0.11), transparent 38%);
+    opacity: 0.72;
+  }
+
+  .hero-mobile-texture::after {
+    content: "";
+    position: absolute;
+    inset: -20% 0;
+    background: linear-gradient(180deg, transparent, hsl(var(--accent) / 0.1), transparent);
+    animation: mobileHeroSweep 7s ease-in-out infinite alternate;
+  }
+
   .animate-soft-reveal {
     animation: softReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
@@ -355,6 +389,10 @@
 
     .project-card img {
       transform: none !important;
+    }
+
+    .hero-mobile-texture::after {
+      animation: none;
     }
   }
 

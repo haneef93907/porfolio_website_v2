@@ -23,6 +23,7 @@ export default function Hero({ content = defaultSiteContent.hero }: { content?: 
       className="hero-surface relative min-h-[100dvh] overflow-hidden flex"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_38%,hsl(var(--primary)/0.11),transparent_28%),radial-gradient(circle_at_84%_66%,hsl(var(--accent)/0.11),transparent_34%)]" />
+      <div className="hero-mobile-texture lg:hidden" />
 
       <div className="relative z-10 w-full lg:w-[48%] flex flex-col justify-center px-5 sm:px-10 lg:px-12 xl:px-16 pb-16 pt-24 sm:py-24">
         <div className="max-w-3xl">
@@ -31,7 +32,7 @@ export default function Hero({ content = defaultSiteContent.hero }: { content?: 
             {content.label}
           </p>
 
-          <h1 className="hero-name max-w-3xl text-balance font-grotesk text-[2.35rem] font-bold leading-[1.06] text-black dark:text-foreground sm:text-5xl xl:text-6xl">
+          <h1 className="hero-name max-w-3xl text-balance font-grotesk text-[2.15rem] font-bold leading-[1.08] text-black dark:text-foreground sm:text-5xl xl:text-6xl">
             {content.title}
           </h1>
 
@@ -93,10 +94,6 @@ export default function Hero({ content = defaultSiteContent.hero }: { content?: 
       </div>
 
       <div className="hero-visual hidden lg:block absolute inset-y-0 left-[54%] right-0 opacity-90">
-        <DigitFallClock />
-      </div>
-
-      <div className="hero-visual lg:hidden absolute top-10 right-0 left-0 h-[34vh] opacity-20 sm:h-[42vh] sm:opacity-30">
         <DigitFallClock />
       </div>
 
