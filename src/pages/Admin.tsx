@@ -38,6 +38,7 @@ import {
   BarChart3,
   Download,
   Eye,
+  EyeOff,
   ImagePlus,
   Lock,
   LogOut,
@@ -160,8 +161,10 @@ function imageUpload(setValue: (value: string) => void) {
 
 export default function Admin() {
   const [loggedIn, setLoggedIn] = useState(() => isAdminAuthenticated());
-  const [email, setEmail] = useState(import.meta.env.VITE_ADMIN_EMAIL || "admin@portfolio.local");
+  const [email, setEmail] = useState(import.meta.env.VITE_ADMIN_EMAIL || "haneef93907@gmail.com");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState("");
   const [tab, setTab] = useState<Tab>("overview");
   const [projects, setProjects] = useState<Project[]>(() => getProjects());
   const [blogs, setBlogs] = useState<BlogPost[]>(() => getBlogs());
@@ -188,11 +191,12 @@ export default function Admin() {
 
   const login = async (event: React.FormEvent) => {
     event.preventDefault();
+    setAuthError("");
     if (await verifyAdminCredentials(email, password)) {
       createAdminSession();
       setLoggedIn(true);
     } else {
-      alert("Incorrect password");
+      setAuthError("Incorrect email or password. Check your Vercel environment variables and try again.");
     }
   };
 
@@ -271,17 +275,38 @@ export default function Admin() {
           <input
             type="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setAuthError("");
+            }}
             className="mb-3 w-full rounded border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-primary"
             placeholder="Admin email"
           />
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-primary"
-            placeholder="Enter admin password"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setAuthError("");
+              }}
+              className="w-full rounded border border-border bg-background px-4 py-3 pr-12 text-foreground outline-none focus:border-primary"
+              placeholder="Enter admin password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          {authError && (
+            <p className="mt-3 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+              {authError}
+            </p>
+          )}
           <button className="mt-4 w-full rounded bg-primary px-4 py-3 font-semibold text-primary-foreground">
             Login
           </button>

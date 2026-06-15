@@ -48,16 +48,20 @@ async function sha256(value: string) {
 }
 
 export async function verifyAdminCredentials(email: string, password: string) {
-  const expectedEmail = import.meta.env.VITE_ADMIN_EMAIL || "admin@portfolio.local";
+  const expectedEmail = import.meta.env.VITE_ADMIN_EMAIL || "haneef93907@gmail.com";
   const expectedHash = import.meta.env.VITE_ADMIN_PASSWORD_HASH;
-  const fallbackPassword = import.meta.env.VITE_ADMIN_PASSWORD || "admin123";
+  const fallbackPassword = import.meta.env.VITE_ADMIN_PASSWORD || "Jobs@123";
 
   if (email.trim().toLowerCase() !== expectedEmail.trim().toLowerCase()) {
     return false;
   }
 
   if (expectedHash) {
-    return (await sha256(password)) === expectedHash;
+    const configuredSecret = expectedHash.trim();
+    const looksLikeSha256 = /^[a-f0-9]{64}$/i.test(configuredSecret);
+    return looksLikeSha256
+      ? (await sha256(password)) === configuredSecret.toLowerCase()
+      : password === configuredSecret;
   }
 
   return password === fallbackPassword;
