@@ -95,6 +95,9 @@ export default function BlogDetail() {
     );
   }
 
+  const blogImages = (safeArray(blog.images).length ? safeArray(blog.images) : [blog.image]).filter(Boolean);
+  const galleryImages = blogImages.filter((image) => image !== blog.image);
+
   return (
     <>
       <SEO
@@ -137,6 +140,19 @@ export default function BlogDetail() {
             loading="eager"
           />
           <div className="mt-10">{renderMarkdown(blog.content)}</div>
+          {galleryImages.length > 0 && (
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+              {galleryImages.map((image) => (
+                <img
+                  key={image}
+                  src={image}
+                  alt={`${blog.title} article image`}
+                  className="aspect-video w-full rounded border border-border object-cover"
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          )}
           <div className="mt-10 flex flex-wrap gap-2">
             {safeArray(blog.tags).map((tag) => (
               <span key={tag} className="rounded bg-secondary px-3 py-1 text-xs text-muted-foreground">

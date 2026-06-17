@@ -92,6 +92,7 @@ interface BlogForm {
   date: string;
   readTime: string;
   image: string;
+  images: string;
   tags: string;
   seoTitle: string;
   seoDescription: string;
@@ -133,11 +134,32 @@ const emptyBlog: BlogForm = {
   date: new Date().toISOString().slice(0, 10),
   readTime: "5 min read",
   image: "/project-amanah.jpg",
+  images: "",
   tags: "Flutter, Mobile Apps",
   seoTitle: "",
   seoDescription: "",
   published: true,
 };
+
+const acceptedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+const imageInputAccept = `${acceptedImageTypes.join(",")},.jpg,.jpeg,.png,.webp,.gif,.svg`;
+
+function isAcceptedImage(file: File) {
+  return acceptedImageTypes.includes(file.type) || /\.svg$/i.test(file.name);
+}
+
+function readImageFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Image could not be read. Please try again."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function mergeLines(current: string, next: string[]) {
+  return [...splitLines(current), ...next].filter((item, index, all) => all.indexOf(item) === index).join("\n");
+}
 
 function splitLines(value: string) {
   return value.split("\n").map((item) => item.trim()).filter(Boolean);
@@ -169,36 +191,43 @@ function upsertById<T extends { id: string }>(items: T[], id: string | undefined
 }
 
 function imageUpload(
-  setValue: (value: string) => void,
+  setValues: (values: string[]) => void,
   getCredentials: () => AdminWriteCredentials,
   setStatus: (value: string) => void,
   setUploading: (value: boolean) => void,
   folder: "projects" | "blogs"
 ) {
-  return (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  return async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    const invalidFile = files.find((file) => !isAcceptedImage(file));
+    if (invalidFile) {
+      setStatus("Unsupported image type. Please upload JPG, PNG, WebP, GIF, or SVG.");
+      event.target.value = "";
+      return;
+    }
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result);
-      setValue(dataUrl);
-      setStatus("Uploading image to Supabase Storage...");
-      void uploadImage(file.name, dataUrl, folder, getCredentials()).then((result) => {
-        setValue(result.url);
-        setStatus(
-          result.source === "backend"
-            ? "Image uploaded to Supabase Storage. Save the item to publish this URL."
-            : `Image is only local right now. Upload failed: ${result.error || "Supabase Storage is not configured."}`
-        );
-      }).finally(() => setUploading(false));
-    };
-    reader.onerror = () => {
+    setStatus(`Uploading ${files.length} image${files.length === 1 ? "" : "s"} to Supabase Storage...`);
+    try {
+      const dataUrls = await Promise.all(files.map(readImageFile));
+      setValues(dataUrls);
+      const results = await Promise.all(
+        files.map((file, index) => uploadImage(file.name, dataUrls[index], folder, getCredentials()))
+      );
+      const urls = results.map((result) => result.url);
+      setValues(urls);
+      const failed = results.find((result) => result.source !== "backend");
+      setStatus(
+        failed
+          ? `Some images are only local right now. Upload failed: ${failed.error || "Supabase Storage is not configured."}`
+          : `${files.length} image${files.length === 1 ? "" : "s"} uploaded. The first image is the thumbnail. Save the item to publish these URLs.`
+      );
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Images could not be read. Please try again.");
+    } finally {
       setUploading(false);
-      setStatus("Image could not be read. Please try again.");
-    };
-    reader.readAsDataURL(file);
-    event.target.value = "";
+      event.target.value = "";
+    }
   };
 }
 
@@ -369,6 +398,7 @@ export default function Admin() {
 
   const saveProjectForm = () => {
     if (!projectForm) return;
+    const projectImages = splitLines(projectForm.screenshots || projectForm.image);
     const payload: Omit<Project, "id"> = {
       slug: projectForm.slug || slugify(projectForm.title),
       title: projectForm.title,
@@ -381,10 +411,10 @@ export default function Admin() {
       category: projectForm.category,
       date: projectForm.date,
       features: splitLines(projectForm.features),
-      screenshots: splitLines(projectForm.screenshots || projectForm.image),
+      screenshots: projectImages,
       result: projectForm.result,
       impact: projectForm.impact || undefined,
-      image: projectForm.image,
+      image: projectImages[0] || projectForm.image,
       links: {
         playStore: projectForm.playStore || undefined,
         appStore: projectForm.appStore || undefined,
@@ -408,6 +438,7 @@ export default function Admin() {
 
   const saveBlogForm = () => {
     if (!blogForm) return;
+    const blogImages = splitLines(blogForm.images || blogForm.image);
     const payload: Omit<BlogPost, "id"> = {
       slug: blogForm.slug || slugify(blogForm.title),
       title: blogForm.title,
@@ -416,7 +447,8 @@ export default function Admin() {
       category: blogForm.category,
       date: blogForm.date,
       readTime: blogForm.readTime,
-      image: blogForm.image,
+      image: blogImages[0] || blogForm.image,
+      images: blogImages,
       tags: splitComma(blogForm.tags),
       seoTitle: blogForm.seoTitle || `${blogForm.title} | Muhammad Haneef`,
       seoDescription: blogForm.seoDescription || blogForm.excerpt,
@@ -690,6 +722,7 @@ export default function Admin() {
                       date: blog.date,
                       readTime: blog.readTime,
                       image: blog.image,
+                      images: (blog.images || [blog.image]).join("\n"),
                       tags: blog.tags.join(", "),
                       seoTitle: blog.seoTitle,
                       seoDescription: blog.seoDescription,
@@ -1051,12 +1084,17 @@ function ProjectEditor({ form, setForm, onSave, onCancel, getCredentials, setSta
         <Field label="Image URL" value={form.image} onChange={(image) => setForm({ ...form, image })} />
         <label className="flex cursor-pointer items-center gap-2 rounded border border-border bg-background px-3 py-2 text-sm text-muted-foreground hover:text-primary">
           <ImagePlus size={16} />
-          Upload project image
+          Upload project images
           <input
             type="file"
-            accept="image/*"
+            accept={imageInputAccept}
+            multiple
             className="hidden"
-            onChange={imageUpload((image) => setForm({ ...form, image }), getCredentials, setStatus, setUploadingMedia, "projects")}
+            onChange={imageUpload((images) => setForm({
+              ...form,
+              image: images[0] || form.image,
+              screenshots: mergeLines(form.screenshots, images),
+            }), getCredentials, setStatus, setUploadingMedia, "projects")}
           />
         </label>
         <Field label="Description" value={form.description} onChange={(description) => setForm({ ...form, description })} textarea />
@@ -1103,15 +1141,21 @@ function BlogEditor({ form, setForm, onSave, onCancel, getCredentials, setStatus
         <Field label="Cover Image URL" value={form.image} onChange={(image) => setForm({ ...form, image })} />
         <label className="flex cursor-pointer items-center gap-2 rounded border border-border bg-background px-3 py-2 text-sm text-muted-foreground hover:text-primary">
           <ImagePlus size={16} />
-          Upload cover image
+          Upload blog images
           <input
             type="file"
-            accept="image/*"
+            accept={imageInputAccept}
+            multiple
             className="hidden"
-            onChange={imageUpload((image) => setForm({ ...form, image }), getCredentials, setStatus, setUploadingMedia, "blogs")}
+            onChange={imageUpload((images) => setForm({
+              ...form,
+              image: images[0] || form.image,
+              images: mergeLines(form.images, images),
+            }), getCredentials, setStatus, setUploadingMedia, "blogs")}
           />
         </label>
         <Field label="Excerpt" value={form.excerpt} onChange={(excerpt) => setForm({ ...form, excerpt })} textarea />
+        <Field label="Blog Images (one URL per line)" value={form.images} onChange={(images) => setForm({ ...form, images, image: splitLines(images)[0] || form.image })} textarea rows={5} />
         <Field label="SEO Title" value={form.seoTitle} onChange={(seoTitle) => setForm({ ...form, seoTitle })} />
         <Field label="SEO Description" value={form.seoDescription} onChange={(seoDescription) => setForm({ ...form, seoDescription })} textarea />
       </div>

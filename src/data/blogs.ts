@@ -10,6 +10,7 @@ export interface BlogPost {
   date: string;
   readTime: string;
   image: string;
+  images?: string[];
   tags: string[];
   seoTitle: string;
   seoDescription: string;
@@ -574,6 +575,8 @@ function normalizeBlog(blog: BlogPost): BlogPost {
   const title = blog?.title || "Untitled Flutter Article";
   const excerpt = blog?.excerpt || "Flutter app development insights by Muhammad Haneef.";
   const tags = Array.isArray(blog?.tags) ? blog.tags : [];
+  const image = blog?.image || "/project-amanah.jpg";
+  const images = Array.isArray(blog?.images) && blog.images.length ? blog.images : [image];
 
   return {
     ...blog,
@@ -584,7 +587,8 @@ function normalizeBlog(blog: BlogPost): BlogPost {
     category: blog?.category || "Flutter",
     date: blog?.date || new Date().toISOString().slice(0, 10),
     readTime: blog?.readTime || "5 min read",
-    image: blog?.image || "/project-amanah.jpg",
+    image,
+    images,
     tags,
     slug: blog?.slug || slugify(title),
     seoTitle: blog?.seoTitle || `${title} | Muhammad Haneef`,

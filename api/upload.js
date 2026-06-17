@@ -41,16 +41,57 @@ function parseDataUrl(dataUrl) {
   const match = String(dataUrl || "").match(/^data:([^;]+);base64,(.+)$/);
   if (!match) return null;
   return {
-    contentType: match[1],
+    contentType: match[1].toLowerCase(),
     buffer: Buffer.from(match[2], "base64"),
   };
 }
+
+const allowedImageTypes = new Map([
+  ["image/jpeg", "jpg"],
+  ["image/jpg", "jpg"],
+  ["image/png", "png"],
+  ["image/webp", "webp"],
+  ["image/gif", "gif"],
+  ["image/svg+xml", "svg"],
+]);
+
+const imageTypesByExtension = new Map([
+  ["jpg", "image/jpeg"],
+  ["jpeg", "image/jpeg"],
+  ["png", "image/png"],
+  ["webp", "image/webp"],
+  ["gif", "image/gif"],
+  ["svg", "image/svg+xml"],
+]);
 
 function safeName(name) {
   return String(name || "upload")
     .toLowerCase()
     .replace(/[^a-z0-9._-]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function extensionFromName(fileName) {
+  const match = String(fileName || "").toLowerCase().match(/\.([a-z0-9]+)$/);
+  return match ? match[1] : "";
+}
+
+function normalizedImageType(contentType, fileName) {
+  if (allowedImageTypes.has(contentType)) return contentType;
+  return imageTypesByExtension.get(extensionFromName(fileName)) || contentType;
+}
+
+function isValidSvg(buffer) {
+  const text = buffer.toString("utf8", 0, Math.min(buffer.length, 4096));
+  return /<svg[\s>]/i.test(text);
+}
+
+function imagePath(folder, fileName, contentType) {
+  const safeFile = safeName(fileName) || "upload";
+  const extension = allowedImageTypes.get(contentType) || "bin";
+  const hasExtension = /\.[a-z0-9]+$/i.test(safeFile);
+  const uploadName = hasExtension ? safeFile : `${safeFile}.${extension}`;
+  return `${safeName(folder) || "uploads"}/${Date.now()}-${uploadName}`;
 }
 
 export default async function handler(request, response) {
@@ -76,7 +117,16 @@ export default async function handler(request, response) {
     return json(response, 400, { error: "Invalid image data." });
   }
 
-  const path = `${safeName(folder)}/${Date.now()}-${safeName(fileName)}`;
+  const contentType = normalizedImageType(parsed.contentType, fileName);
+  if (!allowedImageTypes.has(contentType)) {
+    return json(response, 400, { error: "Unsupported image type. Use JPG, PNG, WebP, GIF, or SVG." });
+  }
+
+  if (contentType === "image/svg+xml" && !isValidSvg(parsed.buffer)) {
+    return json(response, 400, { error: "Invalid SVG image data." });
+  }
+
+  const path = imagePath(folder, fileName, contentType);
   const uploadUrl = `${url}/storage/v1/object/${encodeURIComponent(bucket)}/${path}`;
 
   const upload = await fetch(uploadUrl, {
@@ -84,7 +134,7 @@ export default async function handler(request, response) {
     headers: {
       apikey: serviceKey,
       Authorization: `Bearer ${serviceKey}`,
-      "Content-Type": parsed.contentType,
+      "Content-Type": contentType,
       "x-upsert": "true",
     },
     body: parsed.buffer,
