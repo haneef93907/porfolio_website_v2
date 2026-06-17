@@ -6,6 +6,8 @@ import { safeArray } from "../lib/utils";
 import { ArrowRight, ExternalLink, Store } from "lucide-react";
 
 const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
+  const projectImages = safeArray(project.screenshots).length ? safeArray(project.screenshots) : [project.image];
+
   return (
     <article
       className="project-card group relative flex h-full min-h-0 flex-col bg-card border border-border rounded overflow-hidden transition-all duration-300 hover:border-primary/50 motion-card"
@@ -26,9 +28,28 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
             Featured
           </span>
         )}
+        {projectImages.length > 1 && (
+          <span className="absolute bottom-4 right-4 rounded bg-background/90 px-2.5 py-1 text-[11px] font-mono text-foreground">
+            {projectImages.length} images
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4 sm:p-6">
+        {projectImages.length > 1 && (
+          <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+            {projectImages.map((image) => (
+              <img
+                key={image}
+                src={image}
+                alt={`${project.title} preview`}
+                className="h-14 w-20 shrink-0 rounded border border-border object-cover"
+                loading="lazy"
+              />
+            ))}
+          </div>
+        )}
+
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary break-words">
             {project.category}

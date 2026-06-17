@@ -11,6 +11,10 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 
+function blogImages(blog: BlogPost) {
+  return (safeArray(blog.images).length ? safeArray(blog.images) : [blog.image]).filter(Boolean);
+}
+
 export default function Blog() {
   const location = useLocation();
   const standalone = location.pathname === '/blog';
@@ -68,10 +72,21 @@ export default function Blog() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBlogs.map((blog) => (
-            <div
-              key={blog.id}
-            >
+            <div key={blog.id}>
               <Card className="h-full cursor-pointer group bg-card border-border motion-card">
+                <div className="relative aspect-video overflow-hidden rounded-t-lg border-b border-border">
+                  <img
+                    src={blog.image}
+                    alt={blog.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  {blogImages(blog).length > 1 && (
+                    <span className="absolute bottom-3 right-3 rounded bg-background/90 px-2.5 py-1 text-[11px] font-mono text-foreground">
+                      {blogImages(blog).length} images
+                    </span>
+                  )}
+                </div>
                 <CardHeader>
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant="secondary" className="group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
@@ -93,6 +108,20 @@ export default function Blog() {
                 </CardHeader>
 
                 <CardContent>
+                  {blogImages(blog).length > 1 && (
+                    <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+                      {blogImages(blog).map((image) => (
+                        <img
+                          key={image}
+                          src={image}
+                          alt={`${blog.title} preview`}
+                          className="h-14 w-20 shrink-0 rounded border border-border object-cover"
+                          loading="lazy"
+                        />
+                      ))}
+                    </div>
+                  )}
+
                   <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
                     {blog.excerpt}
                   </p>

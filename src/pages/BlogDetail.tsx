@@ -139,7 +139,6 @@ export default function BlogDetail() {
             className="mt-10 aspect-video w-full rounded border border-border object-cover"
             loading="eager"
           />
-          <div className="mt-10">{renderMarkdown(blog.content)}</div>
           {galleryImages.length > 0 && (
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               {galleryImages.map((image) => (
@@ -153,6 +152,7 @@ export default function BlogDetail() {
               ))}
             </div>
           )}
+          <div className="mt-10">{renderMarkdown(blog.content)}</div>
           <div className="mt-10 flex flex-wrap gap-2">
             {safeArray(blog.tags).map((tag) => (
               <span key={tag} className="rounded bg-secondary px-3 py-1 text-xs text-muted-foreground">

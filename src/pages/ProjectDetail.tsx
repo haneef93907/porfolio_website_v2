@@ -58,6 +58,7 @@ export default function ProjectDetail() {
     ["Website", project.links.website],
     ["Case Study", project.links.caseStudy || project.link],
   ].filter(([, href]) => href);
+  const projectImages = (safeArray(project.screenshots).length ? safeArray(project.screenshots) : [project.image]).filter(Boolean);
 
   return (
     <>
@@ -111,12 +112,27 @@ export default function ProjectDetail() {
                   ))}
                 </div>
               </div>
-              <img
-                src={project.image}
-                alt={project.title}
-                className="aspect-[4/3] w-full rounded border border-border object-cover shadow-2xl"
-                loading="eager"
-              />
+              <div>
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className="aspect-[4/3] w-full rounded border border-border object-cover shadow-2xl"
+                  loading="eager"
+                />
+                {projectImages.length > 1 && (
+                  <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+                    {projectImages.map((image) => (
+                      <img
+                        key={image}
+                        src={image}
+                        alt={`${project.title} preview`}
+                        className="h-20 w-28 shrink-0 rounded border border-border object-cover"
+                        loading="lazy"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -181,7 +197,7 @@ export default function ProjectDetail() {
               Screenshots
             </h2>
             <div className="mt-8 grid gap-5 md:grid-cols-2">
-              {safeArray(project.screenshots).map((screenshot) => (
+              {projectImages.map((screenshot) => (
                 <img
                   key={screenshot}
                   src={screenshot}
