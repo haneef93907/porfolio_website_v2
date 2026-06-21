@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { defaultProjects, getPublishedProjects, type Project } from "../data/projects";
 import { loadContent } from "../lib/contentApi";
 import { safeArray } from "../lib/utils";
-import { ArrowRight, ExternalLink, Store } from "lucide-react";
+import { ArrowRight, ExternalLink, PlayCircle, Store } from "lucide-react";
 
 const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
   const projectImages = safeArray(project.screenshots).length ? safeArray(project.screenshots) : [project.image];
@@ -72,9 +72,9 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
           <h3 className="min-w-0 text-balance font-grotesk text-xl font-semibold leading-tight text-foreground transition-colors break-words group-hover:text-primary sm:text-2xl">
             {project.title}
           </h3>
-          {(project.links.website || project.links.playStore || project.links.appStore || project.link) && (
+          {(project.links.website || project.links.playStore || project.links.appStore || project.links.demoVideo || project.link) && (
             <a
-              href={project.links.website || project.links.playStore || project.links.appStore || project.link}
+              href={project.links.website || project.links.playStore || project.links.appStore || project.links.demoVideo || project.link}
               target="_blank"
               rel="noopener noreferrer"
               className="shrink-0 mt-1 p-1.5 text-muted-foreground hover:text-primary bg-muted hover:bg-primary/10 rounded transition-all"
@@ -130,6 +130,17 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
             >
               <Store size={15} />
               Store
+            </a>
+          )}
+          {project.links.demoVideo && (
+            <a
+              href={project.links.demoVideo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-border px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:text-primary"
+            >
+              <PlayCircle size={15} />
+              Demo
             </a>
           )}
         </div>

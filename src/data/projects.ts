@@ -22,6 +22,7 @@ export interface Project {
     appStore?: string;
     website?: string;
     caseStudy?: string;
+    demoVideo?: string;
   };
   seoTitle: string;
   seoDescription: string;
@@ -379,7 +380,10 @@ function normalizeProject(project: Project): Project {
     category: project.category || "Mobile App",
     screenshots: screenshots.length ? screenshots : [image],
     result: project.result || project.impact || "Delivered a polished production-ready mobile app experience.",
-    links: project.links || { website: project.link },
+    links: {
+      ...(project.links || { website: project.link }),
+      demoVideo: project.links?.demoVideo,
+    },
     seoTitle: project.seoTitle || `${title} Flutter Case Study | Muhammad Haneef`,
     seoDescription: project.seoDescription || description,
     featured: project.featured ?? false,

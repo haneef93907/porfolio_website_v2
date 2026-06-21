@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, PlayCircle } from "lucide-react";
 import { defaultProjects, getProjectBySlug, type Project } from "../data/projects";
 import { loadContent } from "../lib/contentApi";
 import Navigation from "../sections/Navigation";
@@ -9,6 +9,39 @@ import Contact from "../sections/Contact";
 import SEO from "../components/SEO";
 import { safeArray } from "../lib/utils";
 import { SITE_URL } from "../config/site";
+
+function getYouTubeEmbedUrl(value?: string) {
+  if (!value) return "";
+
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.replace(/^www\./, "");
+    let videoId = "";
+
+    if (hostname === "youtu.be") {
+      videoId = url.pathname.split("/").filter(Boolean)[0] || "";
+    }
+
+    if (hostname === "youtube.com" || hostname === "m.youtube.com" || hostname === "youtube-nocookie.com") {
+      if (url.pathname === "/watch") {
+        videoId = url.searchParams.get("v") || "";
+      } else {
+        const [prefix, id] = url.pathname.split("/").filter(Boolean);
+        if (["embed", "shorts", "live"].includes(prefix)) {
+          videoId = id || "";
+        }
+      }
+    }
+
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
+  } catch {
+    return "";
+  }
+}
+
+function isDirectVideoUrl(value?: string) {
+  return Boolean(value && /\.(mp4|webm|ogg|mov)(\?.*)?(#.*)?$/i.test(value));
+}
 
 export default function ProjectDetail() {
   const { slug = "" } = useParams();
@@ -57,8 +90,11 @@ export default function ProjectDetail() {
     ["App Store", project.links.appStore],
     ["Website", project.links.website],
     ["Case Study", project.links.caseStudy || project.link],
+    ["Demo Video", project.links.demoVideo],
   ].filter(([, href]) => href);
   const projectImages = (safeArray(project.screenshots).length ? safeArray(project.screenshots) : [project.image]).filter(Boolean);
+  const demoVideo = project.links.demoVideo?.trim();
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(demoVideo);
 
   return (
     <>
@@ -136,6 +172,48 @@ export default function ProjectDetail() {
             </div>
           </div>
         </section>
+
+        {demoVideo && (
+          <section className="border-y border-border bg-secondary/40 px-6 py-16">
+            <div className="mx-auto max-w-[1100px]">
+              <div className="mb-6 flex items-center gap-3">
+                <PlayCircle className="text-primary" size={24} />
+                <h2 className="font-grotesk text-3xl font-bold text-foreground">
+                  Demo Video
+                </h2>
+              </div>
+              <div className="aspect-video overflow-hidden rounded border border-border bg-card">
+                {youtubeEmbedUrl ? (
+                  <iframe
+                    src={youtubeEmbedUrl}
+                    title={`${project.title} demo video`}
+                    className="h-full w-full"
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                ) : isDirectVideoUrl(demoVideo) ? (
+                  <video
+                    src={demoVideo}
+                    className="h-full w-full bg-black object-contain"
+                    controls
+                    preload="metadata"
+                  />
+                ) : (
+                  <a
+                    href={demoVideo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-full w-full items-center justify-center gap-2 px-6 text-sm font-semibold text-primary transition hover:text-primary/80"
+                  >
+                    Open Demo Video
+                    <ExternalLink size={16} />
+                  </a>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="border-y border-border bg-secondary/40 px-6 py-14">
           <div className="mx-auto grid max-w-[1100px] gap-4 sm:grid-cols-2 lg:grid-cols-4">

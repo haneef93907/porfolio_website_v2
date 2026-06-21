@@ -76,6 +76,7 @@ interface ProjectForm {
   appStore: string;
   website: string;
   caseStudy: string;
+  demoVideo: string;
   seoTitle: string;
   seoDescription: string;
   featured: boolean;
@@ -119,6 +120,7 @@ const emptyProject: ProjectForm = {
   appStore: "",
   website: "",
   caseStudy: "",
+  demoVideo: "",
   seoTitle: "",
   seoDescription: "",
   featured: false,
@@ -420,6 +422,7 @@ export default function Admin() {
         appStore: projectForm.appStore || undefined,
         website: projectForm.website || undefined,
         caseStudy: projectForm.caseStudy || undefined,
+        demoVideo: projectForm.demoVideo || undefined,
       },
       link: projectForm.caseStudy || projectForm.website || undefined,
       seoTitle: projectForm.seoTitle || `${projectForm.title} Flutter Case Study | Muhammad Haneef`,
@@ -661,6 +664,7 @@ export default function Admin() {
                       appStore: project.links.appStore || "",
                       website: project.links.website || "",
                       caseStudy: project.links.caseStudy || project.link || "",
+                      demoVideo: project.links.demoVideo || "",
                       seoTitle: project.seoTitle,
                       seoDescription: project.seoDescription,
                       featured: project.featured,
@@ -1109,6 +1113,7 @@ function ProjectEditor({ form, setForm, onSave, onCancel, getCredentials, setSta
         <Field label="App Store Link" value={form.appStore} onChange={(appStore) => setForm({ ...form, appStore })} />
         <Field label="Website Link" value={form.website} onChange={(website) => setForm({ ...form, website })} />
         <Field label="Case Study Link" value={form.caseStudy} onChange={(caseStudy) => setForm({ ...form, caseStudy })} />
+        <Field label="Demo Video Link (YouTube or direct video URL)" value={form.demoVideo} onChange={(demoVideo) => setForm({ ...form, demoVideo })} />
         <Field label="SEO Title" value={form.seoTitle} onChange={(seoTitle) => setForm({ ...form, seoTitle })} />
         <Field label="SEO Description" value={form.seoDescription} onChange={(seoDescription) => setForm({ ...form, seoDescription })} textarea />
       </div>
